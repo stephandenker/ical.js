@@ -9,9 +9,6 @@
   // lazy defined navigator causes global leak warnings...
 
   var requireBak;
-  var specialRequires = {
-    'chai': requireChai
-  };
 
   testSupport = {
     isNode: (typeof(window) === 'undefined')
@@ -58,16 +55,13 @@
   };
 
   testSupport.require = function cross_require(file, callback) {
-    if (file in specialRequires) {
-      return specialRequires[file](file, callback);
-    }
-
     if (!(/\.js$/.test(file))) {
       file += '.js';
     }
 
-    if (typeof(window) === 'undefined') {
-      var lib = require(__dirname + '/../' + file);
+    if (typeof(require) !== 'undefined') {
+      console.log(__dirname);
+      var lib = require('../' + file);
       if (typeof(callback) !== 'undefined') {
         callback(lib);
       }
@@ -136,68 +130,6 @@
     });
   };
 
-  //'chai has no backtraces in ff
-  //this patch will change the error
-  //class used to provide real .stack.
-  function setupChai(chai) {
-    function chaiAssert(expr, msg, negateMsg, expected, actual) {
-      actual = actual || this.obj;
-      var msg = (this.negate ? negateMsg : msg),
-          ok = this.negate ? !expr : expr;
-
-      if (!ok) {
-        throw new Error(
-          // include custom message if available
-          this.msg ? this.msg + ': ' + msg : msg
-        );
-      }
-    }
-    chai.Assertion.prototype.assert = chaiAssert;
-    chai.Assertion.includeStack = true;
-
-
-    assert = chai.assert;
-
-    // XXX: this is a lame way to do this
-    // in reality we need to fix the above upstream
-    // and leverage new chai 1x methods
-
-    assert.hasProperties = function chai_hasProperties(given, props, msg) {
-      msg = (typeof(msg) === 'undefined') ? '' : msg + ': ';
-
-      if (props instanceof Array) {
-        props.forEach(function(prop) {
-          assert.ok(
-            (prop in given),
-            msg + 'given should have "' + prop + '" property'
-          );
-        });
-      } else {
-        for (var key in props) {
-          assert.deepEqual(
-            given[key],
-            props[key],
-            msg + ' property equality for (' + key + ') '
-          );
-        }
-      }
-    };
-  }
-
-  function requireChai(file, callback) {
-    var path;
-    if (testSupport.isNode) {
-      setupChai(require('chai'));
-    } else {
-      require('/node_modules/chai/chai.js', function() {
-        setupChai(chai);
-      });
-    }
-  }
-
-  testSupport.require('chai');
-
-
   /**
    * @param {String} path relative to root (/) of project.
    * @param {Function} callback [err, contents].
@@ -244,7 +176,7 @@
     testSupport.require('/test/support/' + lib);
   };
 
-  testSupport.require('/node_modules/benchmark/benchmark.js');
+  require('benchmark')
   testSupport.require('/test/support/performance.js');
 
   // Load it here so its pre-loaded in all suite blocks...

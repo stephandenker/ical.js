@@ -50,10 +50,11 @@
     "test": "grunt test-node"
   },
   "testling": {
+    "harness": "mocha-tdd",
     "files": [
-      "test/helper.js",
-      "test/*_test.js",
-      "test/acceptance/*_test.js"
+      "build/ical.js",
+      "test/helper2.js",
+      "test/*_test.js"
     ],
     "browsers": [
       "ie9",
