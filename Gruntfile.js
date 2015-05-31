@@ -9,11 +9,11 @@ module.exports = function(grunt) {
       cwd: 'lib/ical',
       doc: 'api',
       files: [
-        'helpers.js', 'design.js', 'stringify.js', 'parse.js', 'component.js',
-        'property.js', 'utc_offset.js', 'binary.js', 'period.js', 'duration.js',
-        'timezone.js', 'timezone_service.js', 'time.js', 'vcard_time.js',
-        'recur.js', 'recur_iterator.js', 'recur_expansion.js', 'event.js',
-        'component_parser.js'
+        'helpers.js', 'design.js', 'constants.js', 'stringify.js', 'parse.js',
+        'component.js', 'property.js', 'utc_offset.js', 'binary.js',
+        'period.js', 'duration.js', 'timezone.js', 'timezone_service.js',
+        'time.js', 'vcard_time.js', 'recur.js', 'recur_iterator.js',
+        'recur_expansion.js', 'event.js', 'component_parser.js'
       ],
       test: {
         head: ['test/helper.js'],

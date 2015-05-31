@@ -56,6 +56,7 @@
       'event',
       'component_parser',
       'design',
+      'constants',
       'parse',
       'stringify',
       'component',
