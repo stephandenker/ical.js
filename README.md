@@ -29,7 +29,17 @@ subdirectory.
 
 ## Installing
 
-Run: `npm install ical.js`
+You can install ICAL.js via [npm](https://www.npmjs.com/), if you would like to
+use it in node:
+```
+npm install ical.js
+```
+
+Alternatively, it is also available via [bower](http://bower.io/) for front-end
+development:
+```
+bower install ical.js
+```
 
 ICAL.js has no dependencies and uses fairly basic JavaScript. Therefore, it
 should work in all versions of node and modern browsers. It does use getters
@@ -116,3 +126,6 @@ single-file build for use in the browser. This file needs to be checked in (in
 a separate commit) and can be found in [build/ical.js](build/ical.js). Please
 see [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
+Running the `package` target will also create a minified version in
+`build/ical.min.js`. This file is not pushed to the repository at the moment,
+but you can use it for front end projects.
