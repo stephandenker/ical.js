@@ -245,15 +245,20 @@ suite('recur_iterator', function() {
     testRRULE(ruleString, options);
   };
 
-  function testFastForward(ruleString, rangeStart, next) {
+  function testFastForward(ruleString, rangeStart, next, only) {
     var dt = '2015-08-15', tm = 'T12:00:00';
     testRRULE(ruleString, {
       rangeStart: rangeStart,
       description: ruleString + " " + rangeStart + " -> " + next,
       dtStart: next.length == 10 ? dt : dt + tm,
-      dates: [ next ]
+      dates: [ next ],
+      only: only,
     });
   }
+  testFastForward.only = function(ruleString, rangeStart, next) {
+    return testFastForward(ruleString, rangeStart, next, true);
+  };
+
 
   suite("#recurrence rules", function() {
     suite('SECONDLY/MINUTELY/HOURLY', function() {
@@ -278,6 +283,13 @@ suite('recur_iterator', function() {
       });
 
       //simple hourly
+      testRRULE('FREQ=HOURLY;BYHOUR=8,12,15', {
+        dates: [
+          '2015-04-30T08:00:00',
+          '2015-04-30T12:00:00',
+          '2015-04-30T15:00:00'
+        ]
+      });
       testRRULE('FREQ=HOURLY;INTERVAL=3;COUNT=3', {
         byCount: true,
         dates: [
@@ -487,6 +499,18 @@ suite('recur_iterator', function() {
     });
 
     suite('MONTHLY', function() {
+      //monthly, on the 3rd, BYMONTHDAY not set
+      testRRULE('FREQ=MONTHLY', {
+        dates: [
+          '2013-04-03T08:00:00',
+          '2013-05-03T08:00:00',
+          '2013-06-03T08:00:00',
+          '2013-07-03T08:00:00',
+          '2013-08-03T08:00:00',
+          '2013-09-03T08:00:00'
+        ]
+      });
+
       //monthly on first friday for 10 occurrences
       testRRULE('FREQ=MONTHLY;COUNT=10;BYDAY=1FR', {
         dtStart: '2012-01-07T00:00:00',
@@ -590,18 +614,6 @@ suite('recur_iterator', function() {
           '2013-08-31T08:00:00',
           '2013-11-06T08:00:00',
           '2013-11-20T08:00:00'
-        ]
-      });
-
-      //monthly, on the 3rd, BYMONTHDAY not set
-      testRRULE('FREQ=MONTHLY', {
-        dates: [
-          '2013-04-03T08:00:00',
-          '2013-05-03T08:00:00',
-          '2013-06-03T08:00:00',
-          '2013-07-03T08:00:00',
-          '2013-08-03T08:00:00',
-          '2013-09-03T08:00:00'
         ]
       });
 
