@@ -231,9 +231,19 @@ suite('recur_iterator', function() {
         next = iterator.next();
       }
 
-      while (next && inc++ < max) {
+      if (next) {
         dates.push(next.toString());
+      }
+
+      while (++inc < max) {
         next = iterator.next();
+        if (next) {
+          dates.push(next.toString());
+        }
+      }
+
+      if (!options.rangeStart) {
+        assert.equal(iterator.occurrence_number, dates.length);
       }
 
       assert.deepEqual(dates, options.dates || []);
@@ -278,9 +288,13 @@ suite('recur_iterator', function() {
       };
     }
 
-    var dt = '2015-08-15', tm = 'T12:00:00';
-    options.description = ruleString + " " + options.rangeStart + " -> " + options.dates[0];
-    options.dtStart = options.dates[0].length == 10 ? dt : dt + tm;
+    if (!options.description) {
+      options.description = ruleString + " " + options.rangeStart + " -> " + options.dates[0];
+    }
+    if (!options.dtStart) {
+      var dt = '2015-08-15', tm = 'T12:00:00';
+      options.dtStart = (options.dates[0] || rangeStart).length == 10 ? dt : dt + tm;
+    }
     testRRULE(ruleString, options);
   }
   testFastForward.only = function(ruleString, rangeStart, next) {
@@ -291,6 +305,25 @@ suite('recur_iterator', function() {
     });
   };
 
+  function testFastForwardCount(ruleString, next, count) {
+    var ruleCountIncluding = ruleString + ';COUNT=' + count;
+
+    testFastForward(ruleCountIncluding, {
+      description: ruleCountIncluding + ' (with one occurrence)',
+      rangeStart: next,
+      byCount: true,
+      dates: [ next ]
+    });
+
+    var ruleCountWithout = ruleString + ';COUNT=' + (count - 1);
+
+    testFastForward(ruleCountWithout, {
+      description: ruleCountWithout + ' (no occurrences)',
+      rangeStart: next,
+      byCount: true,
+      dates: []
+    });
+  }
 
   suite("#recurrence rules", function() {
     suite('SECONDLY/MINUTELY', function() {
@@ -1089,6 +1122,28 @@ suite('recur_iterator', function() {
   });
 
   suite('#fastForward', function() {
+    suite('UNTIL', function() {
+      testFastForward('FREQ=DAILY;UNTIL=2015-08-16T12:00:00', {
+        description: 'rangeStart falls on UNTIL',
+        rangeStart: '2015-08-16T12:00:00',
+        dates: [ '2015-08-16T12:00:00' ],
+        until: true,
+      });
+      testFastForward('FREQ=DAILY;UNTIL=2015-08-16T12:00:00', {
+        description: 'rangeStart past UNTIL',
+        rangeStart: '2015-08-17T12:00:00',
+        dates: [],
+        until: true,
+      });
+    });
+
+    suite('COUNT', function() {
+      testFastForwardCount('FREQ=DAILY', '2015-08-20T12:00:00', 6);
+      testFastForwardCount('FREQ=DAILY;BYHOUR=12,15;BYMINUTE=0,30;BYSECOND=0,30', '2015-08-20T12:00:00', 41);
+    });
+
+
+    // TODO suite for H/M/S-ly
     suite('DAILY', function() {
       suite('no extra parts', function() {
         testFastForward('FREQ=DAILY',
