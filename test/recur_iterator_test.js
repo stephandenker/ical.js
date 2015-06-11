@@ -261,7 +261,7 @@ suite('recur_iterator', function() {
 
 
   suite("#recurrence rules", function() {
-    suite('SECONDLY/MINUTELY/HOURLY', function() {
+    suite('SECONDLY/MINUTELY', function() {
       // Simple secondly
       testRRULE('FREQ=SECONDLY;INTERVAL=3;COUNT=3', {
         byCount: true,
@@ -281,8 +281,8 @@ suite('recur_iterator', function() {
           '2015-04-30T08:06:00'
         ]
       });
-
-      //simple hourly
+    });
+    suite('HOURLY', function() {
       testRRULE('FREQ=HOURLY;BYHOUR=8,12,15', {
         dates: [
           '2015-04-30T08:00:00',
@@ -296,6 +296,55 @@ suite('recur_iterator', function() {
           '2015-04-30T08:00:00',
           '2015-04-30T11:00:00',
           '2015-04-30T14:00:00'
+        ]
+      });
+
+      testRRULE('FREQ=HOURLY;BYYEARDAY=200', {
+        dates: [
+          '2015-07-19T22:00:00',
+          '2015-07-19T23:00:00',
+          '2016-07-18T00:00:00',
+          '2016-07-18T01:00:00'
+        ]
+      });
+      testRRULE('FREQ=HOURLY;INTERVAL=12;BYYEARDAY=200,300;BYMONTH=10', {
+        dates: [
+          '2015-10-27T10:00:00',
+          '2015-10-27T22:00:00',
+          '2016-10-26T10:00:00',
+          '2016-10-26T22:00:00'
+        ]
+      });
+      testRRULE('FREQ=HOURLY;INTERVAL=12;BYYEARDAY=300;BYMONTHDAY=26', {
+        dates: [
+          '2016-10-26T10:00:00',
+          '2016-10-26T22:00:00',
+          '2020-10-26T10:00:00',
+          '2020-10-26T22:00:00'
+        ]
+      });
+      testRRULE('FREQ=HOURLY;INTERVAL=12;BYYEARDAY=200,300;BYDAY=FR', {
+        dates: [
+          '2017-10-27T10:00:00',
+          '2017-10-27T22:00:00',
+          '2019-07-19T10:00:00',
+          '2019-07-19T22:00:00',
+        ]
+      });
+      testRRULE('FREQ=HOURLY;INTERVAL=12;BYYEARDAY=-366', {
+        dates: [
+          '2016-01-01T10:00:00',
+          '2016-01-01T22:00:00',
+          '2020-01-01T10:00:00',
+          '2020-01-01T22:00:00'
+        ]
+      });
+      testRRULE('FREQ=HOURLY;INTERVAL=12;BYYEARDAY=366', {
+        dates: [
+          '2016-12-31T10:00:00',
+          '2016-12-31T22:00:00',
+          '2020-12-31T10:00:00',
+          '2020-12-31T22:00:00'
         ]
       });
     });
