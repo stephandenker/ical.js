@@ -206,7 +206,6 @@ suite('recur_iterator', function() {
       }
 
       var start = ICAL.Time.fromString(options.dtStart);
-      var recur = ICAL.Recur.fromString(ruleString);
       var iterator = recur.iterator(start);
 
       var inc = 0;
@@ -239,24 +238,57 @@ suite('recur_iterator', function() {
 
       assert.deepEqual(dates, options.dates || []);
     });
+
+    var recur = ICAL.Recur.fromString(ruleString);
+    if (recur.until) {
+      recur.until.isDate = options.isDate;
+    }
+
+    if (["SECONDLY", "MINUTELY", "HOURLY"].indexOf(recur.freq) > -1 ||
+        recur.parts.BYHOUR || recur.parts.BYMINUTE || recur.parts.BYSECOND) {
+      options.noDate = true;
+    }
+
+    if (!options.noDate) {
+      function convertToDate(d) {
+        return d.replace(/T.*$/, '');
+      }
+
+      var dateOptions = ICAL.helpers.clone(options);
+      dateOptions.noDate = true;
+      dateOptions.isDate = true;
+      dateOptions.dtStart = options.dtStart && convertToDate(options.dtStart)
+      dateOptions.dates = options.dates.map(convertToDate);
+      dateOptions.description = (options.description || ruleString) + ' (with DATE)';
+      testRRULE(ruleString, dateOptions);
+    }
   }
   testRRULE.only = function(ruleString, options) {
     options.only = true;
     testRRULE(ruleString, options);
   };
 
-  function testFastForward(ruleString, rangeStart, next, only) {
+  // TODO convert all tests to use options object
+  function testFastForward(ruleString, rangeStart, next) {
+    var options = rangeStart;
+    if (typeof options === 'string') {
+      options = {
+        rangeStart: rangeStart,
+        dates: [ next ]
+      };
+    }
+
     var dt = '2015-08-15', tm = 'T12:00:00';
-    testRRULE(ruleString, {
-      rangeStart: rangeStart,
-      description: ruleString + " " + rangeStart + " -> " + next,
-      dtStart: next.length == 10 ? dt : dt + tm,
-      dates: [ next ],
-      only: only,
-    });
+    options.description = ruleString + " " + options.rangeStart + " -> " + options.dates[0];
+    options.dtStart = options.dates[0].length == 10 ? dt : dt + tm;
+    testRRULE(ruleString, options);
   }
   testFastForward.only = function(ruleString, rangeStart, next) {
-    return testFastForward(ruleString, rangeStart, next, true);
+    return testFastForward(ruleString, {
+      rangeStart: rangeStart,
+      dates: [ next ],
+      only: true
+    });
   };
 
 
@@ -415,6 +447,7 @@ suite('recur_iterator', function() {
     suite('WEEKLY', function() {
       // weekly until
       testRRULE('FREQ=WEEKLY;UNTIL=2012-04-24T06:59:59Z;BYDAY=TU', {
+        noDate: true,
         until: true,
         dates: [
           '2012-04-10T09:00:00',
@@ -978,65 +1011,64 @@ suite('recur_iterator', function() {
       testRRULE('FREQ=YEARLY;BYYEARDAY=1,2,4,6,11,12,20,42,48,49,-306,-303,' +
                 '-293,-292,-266,-259,-258,-239,-228,-209,-168,-164,-134,-133,' +
                 '-113,-105,-87,-56,-44,-26,-21,-14', {
-        dtStart: '2015-01-01',
         dates: [
-          '2015-01-01',
-          '2015-01-02',
-          '2015-01-04',
-          '2015-01-06',
-          '2015-01-11',
-          '2015-01-12',
-          '2015-01-20',
-          '2015-02-11',
-          '2015-02-17',
-          '2015-02-18',
-          '2015-03-01',
-          '2015-03-04',
-          '2015-03-14',
-          '2015-03-15',
-          '2015-04-10',
-          '2015-04-17',
-          '2015-04-18',
-          '2015-05-07',
-          '2015-05-18',
-          '2015-06-06',
-          '2015-07-17',
-          '2015-07-21',
-          '2015-08-20',
-          '2015-08-21',
-          '2015-09-10',
-          '2015-09-18',
-          '2015-10-06',
-          '2015-11-06',
-          '2015-11-18',
-          '2015-12-06',
-          '2015-12-11',
-          '2015-12-18'
+          '2015-01-01T12:00:00',
+          '2015-01-02T12:00:00',
+          '2015-01-04T12:00:00',
+          '2015-01-06T12:00:00',
+          '2015-01-11T12:00:00',
+          '2015-01-12T12:00:00',
+          '2015-01-20T12:00:00',
+          '2015-02-11T12:00:00',
+          '2015-02-17T12:00:00',
+          '2015-02-18T12:00:00',
+          '2015-03-01T12:00:00',
+          '2015-03-04T12:00:00',
+          '2015-03-14T12:00:00',
+          '2015-03-15T12:00:00',
+          '2015-04-10T12:00:00',
+          '2015-04-17T12:00:00',
+          '2015-04-18T12:00:00',
+          '2015-05-07T12:00:00',
+          '2015-05-18T12:00:00',
+          '2015-06-06T12:00:00',
+          '2015-07-17T12:00:00',
+          '2015-07-21T12:00:00',
+          '2015-08-20T12:00:00',
+          '2015-08-21T12:00:00',
+          '2015-09-10T12:00:00',
+          '2015-09-18T12:00:00',
+          '2015-10-06T12:00:00',
+          '2015-11-06T12:00:00',
+          '2015-11-18T12:00:00',
+          '2015-12-06T12:00:00',
+          '2015-12-11T12:00:00',
+          '2015-12-18T12:00:00'
         ]
       });
 
       // Leap year - yearly, byYearDay with negative offsets
       testRRULE('FREQ=YEARLY;BYYEARDAY=-308,-307,-306', {
-        dtStart: '2012-01-01',
+        dtStart: '2012-01-01T12:00:00',
         dates: [
-          '2012-02-28',
-          '2012-02-29',
-          '2012-03-01',
+          '2012-02-28T12:00:00',
+          '2012-02-29T12:00:00',
+          '2012-03-01T12:00:00',
         ]
       });
 
       // Non-leap year - yearly, byYearDay with negative offsets
       testRRULE('FREQ=YEARLY;BYYEARDAY=-307,-306,-305', {
-        dtStart: '2013-01-01',
+        dtStart: '2013-01-01T12:00:00',
         dates: [
-          '2013-02-28',
-          '2013-03-01',
-          '2013-03-02',
+          '2013-02-28T12:00:00',
+          '2013-03-01T12:00:00',
+          '2013-03-02T12:00:00',
         ]
       });
 
-      /* 
-       * Leap-year test for February 29th 
+      /*
+       * Leap-year test for February 29th
        *
        * See https://github.com/mozilla-comm/ical.js/issues/91
        * for details
@@ -1063,8 +1095,12 @@ suite('recur_iterator', function() {
                         '2015-09-01', '2015-09-01T12:00:00');
         testFastForward('FREQ=DAILY',
                         '2015-09-01T12:00:00', '2015-09-01T12:00:00');
-        testFastForward('FREQ=DAILY',
-                        '2015-09-01T12:00:01', '2015-09-02T12:00:00');
+        testFastForward('FREQ=DAILY', {
+          rangeStart:'2015-09-01T12:00:01',
+          dates: [ '2015-09-02T12:00:00' ],
+          noDate: true
+        });
+
 
         testFastForward('FREQ=DAILY;INTERVAL=3',
                         '2015-09-04T12:00:00', '2015-09-05T12:00:00');
@@ -1072,8 +1108,12 @@ suite('recur_iterator', function() {
                         '2015-09-04T12:00:00', '2015-09-04T12:00:00');
         testFastForward('FREQ=DAILY;INTERVAL=6',
                         '2015-09-04T12:00:00', '2015-09-08T12:00:00');
-        testFastForward('FREQ=DAILY;INTERVAL=10',
-                        '2015-09-04T12:00:01', '2015-09-14T12:00:00');
+
+        testFastForward('FREQ=DAILY;INTERVAL=10', {
+          rangeStart: '2015-09-04T12:00:01',
+          dates: [ '2015-09-14T12:00:00' ],
+          noDate: true
+        });
       });
       suite("BYMONTH", function() {
         testFastForward('FREQ=DAILY;BYMONTH=3,10',
@@ -1083,8 +1123,11 @@ suite('recur_iterator', function() {
         testFastForward('FREQ=DAILY;BYMONTH=3,6',
                         '2015-09-01T12:00:00', '2016-03-01T12:00:00');
 
-        testFastForward('FREQ=DAILY;INTERVAL=3;BYMONTH=8,10',
-                        '2015-08-21T12:00:01', '2015-08-24T12:00:00');
+        testFastForward('FREQ=DAILY;INTERVAL=3;BYMONTH=8,10', {
+          rangeStart: '2015-08-21T12:00:01',
+          dates: [ '2015-08-24T12:00:00' ],
+          noDate: true
+        });
       });
       suite("BYMONTHDAY", function() {
         testFastForward('FREQ=DAILY;BYMONTHDAY=5,15',
@@ -1128,14 +1171,20 @@ suite('recur_iterator', function() {
       suite("BYDAY+BYMONTH", function() {
         testFastForward('FREQ=DAILY;BYDAY=TU,TH;BYMONTH=9,12',
                         '2015-09-30T12:00:00', '2015-12-01T12:00:00');
-        testFastForward('FREQ=DAILY;INTERVAL=10;BYDAY=TU,TH;BYMONTH=9,12',
-                        '2015-09-24T12:00:01', '2015-12-03T12:00:00');
+        testFastForward('FREQ=DAILY;INTERVAL=10;BYDAY=TU,TH;BYMONTH=9,12', {
+          rangeStart: '2015-09-24T12:00:01',
+          dates: [ '2015-12-03T12:00:00' ],
+          noDate: true
+        });
       });
       suite("BYDAY+BYMONTH+BYMONTHDAY", function() {
         testFastForward('FREQ=DAILY;BYDAY=TU,TH;BYMONTH=9,12;BYMONTHDAY=8,15',
                         '2015-09-30T12:00:00', '2015-12-08T12:00:00');
-        testFastForward('FREQ=DAILY;INTERVAL=10;BYDAY=TU,TH;BYMONTH=9,12;BYMONTHDAY=8,15',
-                        '2015-09-24T12:00:01', '2016-09-08T12:00:00');
+        testFastForward('FREQ=DAILY;INTERVAL=10;BYDAY=TU,TH;BYMONTH=9,12;BYMONTHDAY=8,15', {
+          rangeStart:'2015-09-24T12:00:01',
+          dates: [ '2016-09-08T12:00:00' ],
+          noDate: true
+        });
       });
       suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
         testFastForward('FREQ=DAILY;BYHOUR=12,15;BYMINUTE=0,20;BYSECOND=0,25;BYDAY=TU,TH;BYMONTH=9,12;BYMONTHDAY=8,15',
@@ -1163,8 +1212,11 @@ suite('recur_iterator', function() {
                         '2015-09-01', '2015-09-15T12:00:00');
         testFastForward('FREQ=MONTHLY',
                         '2015-09-15T12:00:00', '2015-09-15T12:00:00');
-        testFastForward('FREQ=MONTHLY',
-                        '2015-09-15T12:00:01', '2015-10-15T12:00:00');
+        testFastForward('FREQ=MONTHLY', {
+          rangeStart:'2015-09-15T12:00:01',
+          dates: [ '2015-10-15T12:00:00' ],
+          noDate: true
+        });
 
         testFastForward('FREQ=MONTHLY;INTERVAL=3',
                         '2015-09-04T12:00:00', '2015-11-15T12:00:00');
