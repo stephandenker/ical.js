@@ -30,6 +30,6 @@ int main(int argc, char *argv[]) {
             printf("%s\n", icaltime_as_ical_string_r(next));
         }
     } else {
-        printf("Error: %d\n", icalerrno);
+        printf("Error: %s (%d)\n", icalerror_strerror(icalerrno), icalerrno);
     }
 }
