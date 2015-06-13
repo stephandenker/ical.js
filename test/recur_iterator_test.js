@@ -97,8 +97,7 @@ suite('recur_iterator', function() {
       assert.isTrue(newIter.completed, true, 'new iter completed');
     });
 
-    // TODO
-    test.skip('INTERVAL: mid iteration (two iterations)', function() {
+    test('INTERVAL: mid iteration (two iterations)', function() {
       iterator.next();
       iterator.next();
 
@@ -115,19 +114,31 @@ suite('recur_iterator', function() {
       }
     });
 
-    // TODO
-    test.skip('from the begining of iteration', function() {
+    test('from the begining of iteration', function() {
       var expected = {
+        initialized: true,
+        completed: false,
         rule: iterator.rule.toJSON(),
         dtstart: iterator.dtstart.toJSON(),
         by_data: iterator.by_data,
-        days: iterator.days,
-        initialized: true,
-        last: iterator.last ? iterator.last.toJSON() : null,
-        by_indices: iterator.by_indices,
+        last: null,
+        occurrence_number: iterator.occurrence_number,
+
+        by_iter: {
+          BYMONTH: { arr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], idx: 0, wrapped: false },
+          BYMONTHDAY: { arr: [1], idx: 0, wrapped: true },
+          BYDAY: { arr: ["MO", "TU", "WE", "TH", "FR", "SA", "SU"], idx: 0, wrapped: false },
+          BYHOUR: { arr: [9], idx: 0, wrapped: true },
+          BYMINUTE: { arr: [0], idx: 0, wrapped: true },
+          BYSECOND: { arr: [0], idx: 0, wrapped: true },
+        },
+
         by_data_byday: [[0, "MO"], [0, "TU"], [0, "WE"], [0, "TH"], [0, "FR"], [0, "SA"], [0, "SU"]],
         by_cache_year: 0,
-        occurrence_number: iterator.occurrence_number
+        by_cache: [],
+        by_indices: iterator.by_indices,
+        days: iterator.days,
+        days_index: iterator.days_index,
       };
 
       var json = iterator.toJSON();
