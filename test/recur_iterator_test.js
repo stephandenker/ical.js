@@ -336,6 +336,12 @@ suite('recur_iterator', function() {
           '2015-04-30T08:00:06'
         ]
       });
+      testRRULE('FREQ=SECONDLY;BYSECOND=2;BYMINUTE=2;BYHOUR=2;BYMONTHDAY=2;BYMONTH=2', {
+        dates: [
+          '1970-02-02T02:02:02',
+          '1971-02-02T02:02:02'
+        ]
+      });
 
       // Simple minutely
       testRRULE('FREQ=MINUTELY;INTERVAL=3;COUNT=3', {

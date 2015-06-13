@@ -17,7 +17,7 @@ suite('recur', function() {
     function checkDate(data, last, dtstart) {
       var name = JSON.stringify(data);
       // XXX: better names
-      test('RULE: ' + name, function() {
+      (data.only ? test.only : test)('RULE: ' + name, function() {
         var recur = new ICAL.Recur(data);
         if (dtstart) {
           dtstart = ICAL.Time.fromString(dtstart);
@@ -28,6 +28,10 @@ suite('recur', function() {
         assert.equal(iter.next().toString(), last);
       });
     }
+    checkDate.only = function(data, last, dtstart) {
+      data.only = true;
+      return checkDate(data, last, dtstart);
+    };
 
     function checkThrow(data, expectedMessage, dtstart, stack) {
       test(expectedMessage, function() {
@@ -48,7 +52,7 @@ suite('recur', function() {
         BYYEARDAY: [3, 4, 5],
         BYMONTH: [2]
       }
-    }, 'Invalid BYYEARDAY rule');
+    }, 'BYYEARDAY may only appear in SECONDLY/MINUTELY/HOURLY/YEARLY rules');
 
     checkThrow({
       parts: {
@@ -76,7 +80,7 @@ suite('recur', function() {
       parts: {
         BYYEARDAY: [200]
       }
-    }, 'BYYEARDAY may only appear in YEARLY rules');
+    }, 'BYYEARDAY may only appear in SECONDLY/MINUTELY/HOURLY/YEARLY rules');
 
     checkThrow({
       freq: 'MONTHLY',
@@ -86,25 +90,12 @@ suite('recur', function() {
     }, 'Malformed values in BYDAY part', '1970-02-01T00:00:00Z');
 
     checkDate({
-      freq: 'SECONDLY',
-      parts: {
-        BYSECOND: ['2'],
-        BYMINUTE: ['2'],
-        BYHOUR: ['2'],
-        BYDAY: ['2'],
-        BYMONTHDAY: ['2'],
-        BYMONTH: ['2'],
-        BYSETPOS: ['2']
-      }
-    }, '1970-01-01T00:00:00Z');
-
-    checkDate({
       freq: 'MINUTELY',
       parts: {
         BYSECOND: [2, 4, 6],
         BYMINUTE: [1, 3, 5]
       }
-    }, '1970-01-01T00:00:02Z');
+    }, '1970-01-01T00:01:02Z');
 
     checkDate({
       freq: 'YEARLY',
