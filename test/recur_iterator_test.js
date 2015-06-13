@@ -217,6 +217,9 @@ suite('recur_iterator', function() {
       }
 
       var start = ICAL.Time.fromString(options.dtStart);
+      if (options.dtStartZone) {
+        start.zone = ICAL.TimezoneService.get(options.dtStartZone);
+      }
       var iterator = recur.iterator(start);
 
       var inc = 0;
@@ -246,10 +249,17 @@ suite('recur_iterator', function() {
         dates.push(next.toString());
       }
 
+      if (options.dtStartZone) {
+        assert.equal(next.zone.tzid, start.zone.tzid);
+      }
+
       while (++inc < max) {
         next = iterator.next();
         if (next) {
           dates.push(next.toString());
+          if (options.dtStartZone) {
+            assert.equal(next.zone.tzid, start.zone.tzid);
+          }
         }
       }
 
@@ -1136,7 +1146,23 @@ suite('recur_iterator', function() {
       });
       */
     });
+
+    suite("with timezones", function() {
+      testSupport.useTimezones('America/New_York');
+
+      // This one is bound to fail some time, when we skip invalid dates on DST
+      // boundaries. Still keeping it here so we have at least one test that
+      // checks for the zone on the returned dates.
+      testRRULE('FREQ=YEARLY;BYMONTH=11;BYDAY=1SU;BYHOUR=2,5', {
+        dtStartZone: 'America/New_York',
+        dates: [
+          '2015-11-01T05:30:00',
+          '2016-11-06T02:30:00'
+        ]
+      });
+    });
   });
+
 
   suite('#fastForward', function() {
     suite('UNTIL', function() {
