@@ -439,6 +439,35 @@ suite('recur_iterator', function() {
           '2020-12-31T22:00:00'
         ]
       });
+
+      suite('BYYEARDAY', function() {
+        testRRULE('FREQ=HOURLY;INTERVAL=12;BYYEARDAY=104,105,200', {
+          dates: [
+            '2015-07-19T12:00:00',
+            '2016-04-13T00:00:00',
+            '2016-04-13T12:00:00',
+            '2016-04-14T00:00:00',
+            '2016-04-14T12:00:00'
+          ]
+        });
+        testRRULE('FREQ=HOURLY;INTERVAL=12;BYYEARDAY=104,105,200;BYMONTH=4', {
+          dates: [
+            '2016-04-13T00:00:00',
+            '2016-04-13T12:00:00',
+            '2016-04-14T00:00:00',
+            '2016-04-14T12:00:00',
+            '2017-04-14T00:00:00'
+          ]
+        });
+        testRRULE('FREQ=HOURLY;INTERVAL=12;BYYEARDAY=104,105,200;BYMONTH=4;BYMONTHDAY=14', {
+          dates: [
+            '2016-04-14T00:00:00',
+            '2016-04-14T12:00:00',
+            '2017-04-14T00:00:00',
+            '2017-04-14T12:00:00'
+          ]
+        });
+      });
     });
 
     suite('DAILY', function() {
