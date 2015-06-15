@@ -1245,6 +1245,23 @@ suite('recur_iterator', function() {
           dates: [ '2015-08-15T16:00:00' ],
         });
       });
+      suite("BYYEARDAY", function() {
+        /* TODO these take very long
+        testFastForward('FREQ=SECONDLY;BYYEARDAY=227,229', {
+          rangeStart: '2015-08-15T12:00:01',
+          dates: [ '2015-08-15T12:00:01' ]
+        });
+        testFastForward('FREQ=SECONDLY;BYYEARDAY=227,229', {
+          rangeStart: '2015-08-16T23:30:00',
+          dates: [ '2015-08-17T00:00:00' ]
+        });
+        testFastForward('FREQ=SECONDLY;BYYEARDAY=1,364', {
+          dtStart: '2015-12-30T23:59:59',
+          rangeStart: '2015-12-31T23:59:59',
+          dates: [ '2016-01-01T00:00:00' ]
+        });
+        */
+      });
       suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
         testFastForward('FREQ=SECONDLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
           rangeStart: '2015-09-04T12:00:00',
@@ -1326,6 +1343,20 @@ suite('recur_iterator', function() {
         testFastForward('FREQ=MINUTELY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
           rangeStart: '2015-08-15T16:00:00',
           dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYYEARDAY", function() {
+        testFastForward('FREQ=MINUTELY;BYYEARDAY=227,300', {
+          rangeStart: '2015-08-15T12:30:20',
+          dates: [ '2015-08-15T12:31:00' ]
+        });
+        testFastForward('FREQ=MINUTELY;BYYEARDAY=227,301', {
+          rangeStart: '2015-09-04T12:30:00',
+          dates: [ '2015-10-28T00:00:00' ]
+        });
+        testFastForward('FREQ=MINUTELY;BYYEARDAY=104,227', {
+          rangeStart: '2015-09-04T12:30:00',
+          dates: [ '2016-04-13T00:00:00' ]
         });
       });
       suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
@@ -1419,6 +1450,20 @@ suite('recur_iterator', function() {
         testFastForward('FREQ=HOURLY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
           rangeStart: '2015-08-15T16:00:00',
           dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYYEARDAY", function() {
+        testFastForward('FREQ=HOURLY;BYYEARDAY=227,300', {
+          rangeStart: '2015-08-15T12:30:00',
+          dates: [ '2015-08-15T13:00:00' ]
+        });
+        testFastForward('FREQ=HOURLY;BYYEARDAY=227,301', {
+          rangeStart: '2015-09-04T12:30:00',
+          dates: [ '2015-10-28T00:00:00' ]
+        });
+        testFastForward('FREQ=HOURLY;BYYEARDAY=104,227', {
+          rangeStart: '2015-09-04T12:30:00',
+          dates: [ '2016-04-13T00:00:00' ]
         });
       });
       suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
