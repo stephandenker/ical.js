@@ -1174,8 +1174,275 @@ suite('recur_iterator', function() {
       testFastForwardCount('FREQ=DAILY;BYHOUR=12,15;BYMINUTE=0,30;BYSECOND=0,30', '2015-08-20T12:00:00', 41);
     });
 
+    suite('SECONDLY', function() {
+      suite('no extra parts', function() {
+        testFastForward('FREQ=SECONDLY', {
+          rangeStart: '2015-09-01T12:59:59',
+          dates: [ '2015-09-01T12:59:59' ]
+        });
+        testFastForward('FREQ=SECONDLY;INTERVAL=5', {
+          rangeStart: '2015-09-01T13:00:01',
+          dates: [ '2015-09-01T13:00:05' ]
+        });
+      });
+      suite('BYMONTH', function() {
+        testFastForward('FREQ=SECONDLY;BYMONTH=3,10', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-01T00:00:00' ],
+        });
+        testFastForward('FREQ=SECONDLY;BYMONTH=8,10', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      })
+      suite('BYMONTHDAY', function() {
+        testFastForward('FREQ=SECONDLY;BYMONTHDAY=5,15', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-09-05T00:00:00' ],
+        });
+        testFastForward('FREQ=SECONDLY;BYMONTHDAY=5,15', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      })
+      suite('BYMONTH+BYMONTHDAY', function() {
+        testFastForward('FREQ=SECONDLY;BYMONTH=3,10;BYMONTHDAY=5,15', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-05T00:00:00' ],
+        });
+        testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYMONTHDAY=5,15', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY", function() {
+        testFastForward('FREQ=SECONDLY;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-09-08T00:00:00' ],
+        });
+        testFastForward('FREQ=SECONDLY;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY+BYMONTH", function() {
+        testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-01T00:00:00' ],
+        });
+        testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY+BYMONTH+BYMONTHDAY", function() {
+        testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-15T00:00:00' ],
+        });
+        testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
+        testFastForward('FREQ=SECONDLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-15T12:02:10' ],
+        });
+        testFastForward('FREQ=SECONDLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T12:30:00',
+          dates: [ '2015-08-15T14:02:10' ],
+        });
+      });
+    });
 
-    // TODO suite for H/M/S-ly
+    suite('MINUTELY', function() {
+      suite('no extra parts', function() {
+        testFastForward('FREQ=MINUTELY', {
+          rangeStart: '2015-09-01T12:59:59',
+          dates: [ '2015-09-01T13:00:00' ]
+        });
+        testFastForward('FREQ=MINUTELY;INTERVAL=2', {
+          rangeStart: '2015-09-01T13:00:01',
+          dates: [ '2015-09-01T13:02:00' ]
+        });
+      });
+      suite('BYMONTH', function() {
+        testFastForward('FREQ=MINUTELY;BYMONTH=3,10', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-01T00:00:00' ],
+        });
+        testFastForward('FREQ=MINUTELY;BYMONTH=8,10', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      })
+      suite('BYMONTHDAY', function() {
+        testFastForward('FREQ=MINUTELY;BYMONTHDAY=5,15', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-09-05T00:00:00' ],
+        });
+        testFastForward('FREQ=MINUTELY;BYMONTHDAY=5,15', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      })
+      suite('BYMONTH+BYMONTHDAY', function() {
+        testFastForward('FREQ=MINUTELY;BYMONTH=3,10;BYMONTHDAY=5,15', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-05T00:00:00' ],
+        });
+        testFastForward('FREQ=MINUTELY;BYMONTH=8,10;BYMONTHDAY=5,15', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY", function() {
+        testFastForward('FREQ=MINUTELY;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-09-08T00:00:00' ],
+        });
+        testFastForward('FREQ=MINUTELY;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY+BYMONTH", function() {
+        testFastForward('FREQ=MINUTELY;BYMONTH=8,10;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-01T00:00:00' ],
+        });
+        testFastForward('FREQ=MINUTELY;BYMONTH=8,10;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY+BYMONTH+BYMONTHDAY", function() {
+        testFastForward('FREQ=MINUTELY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-15T00:00:00' ],
+        });
+        testFastForward('FREQ=MINUTELY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
+        testFastForward('FREQ=MINUTELY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-15T12:02:10' ],
+        });
+        testFastForward('FREQ=MINUTELY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T12:30:00',
+          dates: [ '2015-08-15T14:02:10' ],
+        });
+      });
+      suite("BYSECOND+BYSETPOS", function() {
+        testFastForward('FREQ=MINUTELY;BYSECOND=10,20;BYSETPOS=-1', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-09-04T12:00:20' ]
+        });
+        testFastForward('FREQ=MINUTELY;BYSECOND=10,20;BYSETPOS=-1', {
+          rangeStart: '2015-08-15T12:30:00',
+          dates: [ '2015-08-15T12:30:20' ],
+        });
+      });
+    });
+
+    suite('HOURLY', function() {
+      suite('no extra parts', function() {
+        testFastForward('FREQ=HOURLY', {
+          rangeStart: '2015-09-01T12:59:59',
+          dates: [ '2015-09-01T13:00:00' ]
+        });
+        testFastForward('FREQ=HOURLY;INTERVAL=2', {
+          rangeStart: '2015-09-01T12:59:59',
+          dates: [ '2015-09-01T14:00:00' ]
+        });
+      });
+      suite('BYMONTH', function() {
+        testFastForward('FREQ=HOURLY;BYMONTH=3,10', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-01T00:00:00' ],
+        });
+        testFastForward('FREQ=HOURLY;BYMONTH=8,10', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      })
+      suite('BYMONTHDAY', function() {
+        testFastForward('FREQ=HOURLY;BYMONTHDAY=5,15', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-09-05T00:00:00' ],
+        });
+        testFastForward('FREQ=HOURLY;BYMONTHDAY=5,15', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      })
+      suite('BYMONTH+BYMONTHDAY', function() {
+        testFastForward('FREQ=HOURLY;BYMONTH=3,10;BYMONTHDAY=5,15', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-05T00:00:00' ],
+        });
+        testFastForward('FREQ=HOURLY;BYMONTH=8,10;BYMONTHDAY=5,15', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY", function() {
+        testFastForward('FREQ=HOURLY;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-09-08T00:00:00' ],
+        });
+        testFastForward('FREQ=HOURLY;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY+BYMONTH", function() {
+        testFastForward('FREQ=HOURLY;BYMONTH=8,10;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-01T00:00:00' ],
+        });
+        testFastForward('FREQ=HOURLY;BYMONTH=8,10;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYDAY+BYMONTH+BYMONTHDAY", function() {
+        testFastForward('FREQ=HOURLY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-15T00:00:00' ],
+        });
+        testFastForward('FREQ=HOURLY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T16:00:00',
+          dates: [ '2015-08-15T16:00:00' ],
+        });
+      });
+      suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
+        testFastForward('FREQ=HOURLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-10-15T12:02:10' ],
+        });
+        testFastForward('FREQ=HOURLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
+          rangeStart: '2015-08-15T12:30:00',
+          dates: [ '2015-08-15T14:02:10' ],
+        });
+      });
+      suite("BYMINUTE+BYSECOND+BYSETPOS", function() {
+        testFastForward('FREQ=HOURLY;BYMINUTE=2,5;BYSECOND=10,20;BYSETPOS=-1', {
+          rangeStart: '2015-09-04T12:00:00',
+          dates: [ '2015-09-04T12:05:20' ]
+        });
+        testFastForward('FREQ=HOURLY;BYMINUTE=2,5;BYSECOND=10,20;BYSETPOS=-1', {
+          rangeStart: '2015-08-15T12:30:00',
+          dates: [ '2015-08-15T13:05:20' ],
+        });
+      });
+    });
+
     suite('DAILY', function() {
       suite('no extra parts', function() {
         testFastForward('FREQ=DAILY',
