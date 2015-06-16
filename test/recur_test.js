@@ -14,10 +14,10 @@ suite('recur', function() {
   });
 
   suite('#iterator', function() {
-    function checkDate(data, last, dtstart) {
+    var checkDate = testSupport.testHelper(function(runner, data, last, dtstart) {
       var name = JSON.stringify(data);
       // XXX: better names
-      (data.only ? test.only : test)('RULE: ' + name, function() {
+      runner.test('RULE: ' + name, function() {
         var recur = new ICAL.Recur(data);
         if (dtstart) {
           dtstart = ICAL.Time.fromString(dtstart);
@@ -27,14 +27,10 @@ suite('recur', function() {
         var iter = recur.iterator(dtstart);
         assert.equal(iter.next().toString(), last);
       });
-    }
-    checkDate.only = function(data, last, dtstart) {
-      data.only = true;
-      return checkDate(data, last, dtstart);
-    };
+    });
 
-    function checkThrow(data, expectedMessage, dtstart, stack) {
-      test(expectedMessage, function() {
+    var checkThrow = testSupport.testHelper(function(runner, data, expectedMessage, dtstart, stack) {
+      runner.test(expectedMessage, function() {
         var recur = new ICAL.Recur(data);
         if (dtstart) {
           dtstart = ICAL.Time.fromString(dtstart);
@@ -45,7 +41,7 @@ suite('recur', function() {
           var iter = recur.iterator(dtstart);
         }, expectedMessage);
       });
-    }
+    });
 
     checkThrow({
       parts: {

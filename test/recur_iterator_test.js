@@ -158,9 +158,8 @@ suite('recur_iterator', function() {
 
   });
 
-  function testRRULE(ruleString, options) {
-    var runner = options.only ? test.only : test;
-    runner(options.description || ruleString, function() {
+  var testRRULE = testSupport.testHelper(function(runner, ruleString, options) {
+    runner.test(options.description || ruleString, function() {
       if (!options.dtStart) {
         options.dtStart = options.dates[0];
       }
@@ -241,18 +240,14 @@ suite('recur_iterator', function() {
       dateOptions.dtStart = options.dtStart && convertToDate(options.dtStart)
       dateOptions.dates = options.dates.map(convertToDate);
       dateOptions.description = (options.description || ruleString) + ' (with DATE)';
-      testRRULE(ruleString, dateOptions);
+      testRRULE._inner(runner, ruleString, dateOptions);
     }
-  }
-  testRRULE.only = function(ruleString, options) {
-    options.only = true;
-    testRRULE(ruleString, options);
-  };
+  });
 
   // TODO convert all tests to use options object
-  function testFastForward(ruleString, rangeStart, next) {
+  var testFastForward = testSupport.testHelper(function(runner, ruleString, rangeStart, next) {
     var options = rangeStart;
-    if (typeof options === 'string') {
+    if (typeof rangeStart === 'string') {
       options = {
         rangeStart: rangeStart,
         dates: [ next ]
@@ -266,24 +261,13 @@ suite('recur_iterator', function() {
       var dt = '2015-08-15', tm = 'T12:00:00';
       options.dtStart = (options.dates[0] || rangeStart).length == 10 ? dt : dt + tm;
     }
-    testRRULE(ruleString, options);
-  }
-  testFastForward.only = function(ruleString, rangeStart, next) {
-    var options = rangeStart;
-    if (typeof options === 'string') {
-      options = {
-        rangeStart: rangeStart,
-        dates: [ next ]
-      };
-    }
-    options.only = true;
-    return testFastForward(ruleString, options);
-  };
+    testRRULE._inner(runner, ruleString, options);
+  });
 
-  function testFastForwardCount(ruleString, next, count) {
+  var testFastForwardCount = testSupport.testHelper(function(runner, ruleString, next, count) {
     var ruleCountIncluding = ruleString + ';COUNT=' + count;
 
-    testFastForward(ruleCountIncluding, {
+    testFastForward._inner(runner, ruleCountIncluding, {
       description: ruleCountIncluding + ' (with one occurrence)',
       rangeStart: next,
       byCount: true,
@@ -292,13 +276,13 @@ suite('recur_iterator', function() {
 
     var ruleCountWithout = ruleString + ';COUNT=' + (count - 1);
 
-    testFastForward(ruleCountWithout, {
+    testFastForward._inner(runner, ruleCountWithout, {
       description: ruleCountWithout + ' (no occurrences)',
       rangeStart: next,
       byCount: true,
       dates: []
     });
-  }
+  });
 
   suite("#recurrence rules", function() {
     suite('SECONDLY/MINUTELY', function() {

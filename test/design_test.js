@@ -218,7 +218,7 @@ suite('design', function() {
     });
 
     suite('vcard date/time types', function() {
-      function testRoundtrip(jcal, ical, props, only) {
+      var testRoundtrip = testSupport.testHelper(function(runner, jcal, ical, props) {
         function testForType(type, valuePrefix, valueSuffix, zone) {
           var subject = ICAL.design.vcard.value[type];
           var prefix = valuePrefix || '';
@@ -243,8 +243,7 @@ suite('design', function() {
             assert.equal(decorated.toICALString(), icalvalue);
           });
         }
-        (only ? suite.only : suite)(jcal, function() {
-
+        runner.suite(jcal, function() {
           if (props.year || props.month || props.day) {
             testForType('date-and-or-time');
             if (!props.hour && !props.minute && !props.second) {
@@ -270,10 +269,7 @@ suite('design', function() {
             }
           }
         });
-      }
-      testRoundtrip.only = function(jcal, ical, props) {
-        testRoundtrip(jcal, ical, props, true);
-      };
+      });
 
       // dates
       testRoundtrip('1985-04-12', '19850412', {

@@ -210,21 +210,29 @@
     testSupport.require('/test/support/' + lib);
   };
 
-  testSupport.testHelper = function(func) {
-    function wrapRunner(/* runner, ...args */) {
-      var args = Array.prototype.slice.call(arguments);
-      var runner = args.shift();
-      if (runner) {
-        args.push({ test: test[runner], suite: suite[runner] });
-      } else {
-        args.push({ test: test, suite: suite });
-      }
-      func.apply(null, args);
-    }
 
-    func.skip = wrapRunner.bind(null, 'skip');
-    func.only = wrapRunner.bind(null, 'only');
-    return wrapRunner.bind(null, null);
+  /**
+   * Creates a test helper, that can be called with only and skip. The inner
+   * function will be called with one extra argument, an object containing two
+   * properties, `test` and `suite`. These should be used to run the suite or
+   * test.
+   *
+   * @param {Function} func     The inner function.
+   * @return {Function}         The wrapped test helper.
+   *
+   * @example
+   * var testRRULE = testSupport.testHelper(function(runner, arg1, arg2) {
+   *   runner.test('something', function() {
+   *     ...
+   *   });
+   * });
+   */
+  testSupport.testHelper = function(func) {
+    var wrappedFunc = func.bind(null, { test: test, suite: suite });
+    wrappedFunc.skip = func.bind(null, { test: test.skip, suite: suite.skip });
+    wrappedFunc.only = func.bind(null, { test: test.only, suite: suite.only });
+    wrappedFunc._inner = func
+    return wrappedFunc;
   };
 
   testSupport.require('/node_modules/benchmark/benchmark.js');

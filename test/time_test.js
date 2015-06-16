@@ -1072,8 +1072,8 @@ suite('icaltime', function() {
   });
 
   suite('date properites', function() {
-    function testDateProperties(str, data, only) {
-      (only ? test.only : test)(str, function() {
+    var testDateProperties = testSupport.testHelper(function(runner, str, data) {
+      runner.test(str, function() {
         var dt = Time.fromString(str);
         assert.equal(data.isDate, dt.isDate);
         assert.equal(data.year, dt.year);
@@ -1106,10 +1106,7 @@ suite('icaltime', function() {
         assert.equal(data.minute, dt.minute);
         assert.equal(data.second, dt.second);
       });
-    }
-    testDateProperties.only = function(str, data) {
-      testDateProperties(str, data, true);
-    }
+    });
 
     // A date where the year starts on sunday
     testDateProperties('2012-01-01T00:00:00', {
@@ -1650,9 +1647,9 @@ suite('icaltime', function() {
     });
 
     suite("weekOneStarts", function() {
-      function testWeekOne(year, dates, only) {
+      var testWeekOne = testSupport.testHelper(function(runner, year, dates) {
         var dom = ICAL.Time.getDominicalLetter(year);
-        (only ? test.only : test)(year + " (" + dom + ")", function() {
+        runner.test(year + " (" + dom + ")", function() {
           for (var wkday in dates) {
             var icalwkday = ICAL.Time[wkday];
             var w1st = Time.weekOneStarts(year, icalwkday);
@@ -1664,10 +1661,7 @@ suite('icaltime', function() {
             assert.isAbove(startOfWeek.weekNumber(icalwkday), 51, wkday);
           }
         });
-      }
-      testWeekOne.only = function(year, dates) {
-        testWeekOne(year, dates, true);
-      }
+      });
 
       test('default week start', function() {
         var w1st = Time.weekOneStarts(1989);
