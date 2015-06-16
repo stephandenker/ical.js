@@ -1241,7 +1241,7 @@ suite('recur_iterator', function() {
       });
       suite('BYMONTH', function() {
         testFastForward('FREQ=SECONDLY;BYMONTH=3,10', {
-          rangeStart: '2015-09-04T12:00:00',
+          rangeStart: '2015-09-30T23:59:00',
           dates: [ '2015-10-01T00:00:00' ],
         });
         testFastForward('FREQ=SECONDLY;BYMONTH=8,10', {
@@ -1251,7 +1251,7 @@ suite('recur_iterator', function() {
       })
       suite('BYMONTHDAY', function() {
         testFastForward('FREQ=SECONDLY;BYMONTHDAY=5,15', {
-          rangeStart: '2015-09-04T12:00:00',
+          rangeStart: '2015-09-04T23:59:00',
           dates: [ '2015-09-05T00:00:00' ],
         });
         testFastForward('FREQ=SECONDLY;BYMONTHDAY=5,15', {
@@ -1271,7 +1271,7 @@ suite('recur_iterator', function() {
       });
       suite("BYDAY", function() {
         testFastForward('FREQ=SECONDLY;BYDAY=TU,TH', {
-          rangeStart: '2015-09-04T12:00:00',
+          rangeStart: '2015-09-07T23:59:00',
           dates: [ '2015-09-08T00:00:00' ],
         });
         testFastForward('FREQ=SECONDLY;BYDAY=SA,SU', {
@@ -1281,7 +1281,7 @@ suite('recur_iterator', function() {
       });
       suite("BYDAY+BYMONTH", function() {
         testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYDAY=TU,TH', {
-          rangeStart: '2015-09-04T12:00:00',
+          rangeStart: '2015-09-30T23:59:00',
           dates: [ '2015-10-01T00:00:00' ],
         });
         testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYDAY=SA,SU', {
@@ -1291,7 +1291,7 @@ suite('recur_iterator', function() {
       });
       suite("BYDAY+BYMONTH+BYMONTHDAY", function() {
         testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
-          rangeStart: '2015-09-04T12:00:00',
+          rangeStart: '2015-09-30T23:59:59',
           dates: [ '2015-10-15T00:00:00' ],
         });
         testFastForward('FREQ=SECONDLY;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
@@ -1318,7 +1318,7 @@ suite('recur_iterator', function() {
       });
       suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
         testFastForward('FREQ=SECONDLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
-          rangeStart: '2015-09-04T12:00:00',
+          rangeStart: '2015-09-30T23:59:59',
           dates: [ '2015-10-15T12:02:10' ],
         });
         testFastForward('FREQ=SECONDLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
