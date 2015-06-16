@@ -1300,7 +1300,6 @@ suite('recur_iterator', function() {
         });
       });
       suite("BYYEARDAY", function() {
-        /* TODO these take very long
         testFastForward('FREQ=SECONDLY;BYYEARDAY=227,229', {
           rangeStart: '2015-08-15T12:00:01',
           dates: [ '2015-08-15T12:00:01' ]
@@ -1314,7 +1313,6 @@ suite('recur_iterator', function() {
           rangeStart: '2015-12-31T23:59:59',
           dates: [ '2016-01-01T00:00:00' ]
         });
-        */
       });
       suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
         testFastForward('FREQ=SECONDLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=TU,TH', {
@@ -1324,6 +1322,12 @@ suite('recur_iterator', function() {
         testFastForward('FREQ=SECONDLY;BYHOUR=12,14;BYMINUTE=2,5;BYSECOND=10,20;BYMONTH=8,10;BYMONTHDAY=5,15;BYDAY=SA,SU', {
           rangeStart: '2015-08-15T12:30:00',
           dates: [ '2015-08-15T14:02:10' ],
+        });
+      });
+      suite("BYSECOND+BYMINUTE+BYHOUR+BYMONTH+BYMONTHDAY", function() {
+        testFastForward('FREQ=SECONDLY;BYSECOND=20,30;BYMINUTE=40,50;BYHOUR=2,5;BYMONTH=1,10;BYMONTHDAY=1,20', {
+          rangeStart: '2015-11-21T06:55:35',
+          dates: [ '2016-01-01T02:40:20' ]
         });
       });
     });
