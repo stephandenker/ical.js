@@ -158,57 +158,6 @@ suite('recur_iterator', function() {
 
   });
 
-  suite('#normalizeByMonthDayRules', function() {
-    var recur, iterator;
-
-    setup(function() {
-      var start = ICAL.Time.fromString('2012-02-01T09:00:00');
-      recur = ICAL.Recur.fromString('FREQ=MONTHLY;COUNT=2');
-      iterator = recur.iterator(start);
-    });
-
-    test('positive rules', function() {
-      var result = iterator.normalizeByMonthDayRules(
-        2012, 2, [21, 15]
-      );
-
-      assert.deepEqual(result, [15, 21]);
-    });
-
-    test('when given zero', function() {
-      var result = iterator.normalizeByMonthDayRules(
-        2012, 2, [21, 0]
-      );
-
-      assert.deepEqual(result, [21]);
-    });
-
-    test('extra days', function() {
-      var result = iterator.normalizeByMonthDayRules(
-        2012, 2, [1, 31]
-      );
-
-      assert.deepEqual(result, [1]);
-    });
-
-    test('negative and positive days', function() {
-      var result = iterator.normalizeByMonthDayRules(
-        2012, 2, [1, -1]
-      );
-
-      assert.deepEqual(result, [1, 29]);
-    });
-
-    test('duplicates', function() {
-      var result = iterator.normalizeByMonthDayRules(
-        // -29 === 1st day
-        2012, 2, [2, 2, 1, -29]
-      );
-
-      assert.deepEqual(result, [1, 2]);
-    });
-  });
-
   function testRRULE(ruleString, options) {
     var runner = options.only ? test.only : test;
     runner(options.description || ruleString, function() {

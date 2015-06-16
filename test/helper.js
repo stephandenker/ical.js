@@ -211,23 +211,20 @@
   };
 
   testSupport.testHelper = function(func) {
-    func.skip = function() {
+    function wrapRunner(/* runner, ...args */) {
       var args = Array.prototype.slice.call(arguments);
-      args.push({
-        test: test.skip,
-        suite: suite.skip
-      });
-      func.apply(undefined, args);
+      var runner = args.shift();
+      if (runner) {
+        args.push({ test: test[runner], suite: suite[runner] });
+      } else {
+        args.push({ test: test, suite: suite });
+      }
+      func.apply(null, args);
     }
-    func.only = function() {
-      var args = Array.prototype.slice.call(arguments);
-      args.push({
-        test: test.only,
-        suite: suite.only
-      });
-      func.apply(undefined, args);
-    };
-    return func;
+
+    func.skip = wrapRunner.bind(null, 'skip');
+    func.only = wrapRunner.bind(null, 'only');
+    return wrapRunner.bind(null, null);
   };
 
   testSupport.require('/node_modules/benchmark/benchmark.js');
