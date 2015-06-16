@@ -221,6 +221,7 @@ suite('recur_iterator', function() {
         start.zone = ICAL.TimezoneService.get(options.dtStartZone);
       }
       var iterator = recur.iterator(start);
+      iterator.duplicates = options.duplicates;
 
       var inc = 0;
       var dates = [];
@@ -465,6 +466,25 @@ suite('recur_iterator', function() {
             '2016-04-14T12:00:00',
             '2017-04-14T00:00:00',
             '2017-04-14T12:00:00'
+          ]
+        });
+
+        testRRULE('FREQ=HOURLY;INTERVAL=24;BYYEARDAY=104,-263', {
+          duplicates: true,
+          dates: [
+            '2016-04-13T00:00:00',
+            '2016-04-13T00:00:00',
+            '2017-04-13T00:00:00',
+            '2017-04-14T00:00:00',
+          ]
+        });
+
+        testRRULE.only('FREQ=HOURLY;INTERVAL=24;BYYEARDAY=-100,-150,-200', {
+          dates: [
+            '2015-08-04T12:00:00',
+            '2015-09-23T12:00:00',
+            '2016-06-15T12:00:00',
+            '2016-08-04T12:00:00'
           ]
         });
       });
