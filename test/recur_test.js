@@ -55,13 +55,6 @@ suite('recur', function() {
     }, 'BYYEARDAY may only appear in SECONDLY/MINUTELY/HOURLY/YEARLY rules');
 
     checkThrow({
-      parts: {
-        BYWEEKNO: [3],
-        BYMONTHDAY: [2]
-      }
-   }, 'BYWEEKNO does not fit to BYMONTHDAY');
-
-    checkThrow({
       freq: 'MONTHLY',
       parts: {
         BYWEEKNO: [30]

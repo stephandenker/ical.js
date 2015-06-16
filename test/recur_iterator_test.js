@@ -479,7 +479,7 @@ suite('recur_iterator', function() {
           ]
         });
 
-        testRRULE.only('FREQ=HOURLY;INTERVAL=24;BYYEARDAY=-100,-150,-200', {
+        testRRULE('FREQ=HOURLY;INTERVAL=24;BYYEARDAY=-100,-150,-200', {
           dates: [
             '2015-08-04T12:00:00',
             '2015-09-23T12:00:00',
@@ -917,194 +917,269 @@ suite('recur_iterator', function() {
     });
 
     suite('YEARLY', function() {
-      //yearly & by month with one by day
-      testRRULE('FREQ=YEARLY;BYMONTH=3;BYDAY=TU', {
-        dtStart: '1970-03-08T02:00:00',
-        dates: [
-          '1970-03-10T02:00:00'
-        ]
+      suite('no extra parts', function() {
+        testRRULE('FREQ=YEARLY;', {
+          dtStart: '2012-02-29T12:00:00',
+          dates: [
+            '2012-02-29T12:00:00',
+            '2016-02-29T12:00:00'
+          ]
+        });
       });
 
-      //every monday in January, for 3 years
-      testRRULE('FREQ=YEARLY;UNTIL=2015-01-31T09:00:00Z;BYMONTH=1;BYDAY=MO', {
-        dtStart: '2012-05-01T09:00:00',
-        until: true,
-        dates: [
-          '2013-01-07T09:00:00',
-          '2013-01-14T09:00:00',
-          '2013-01-21T09:00:00',
-          '2013-01-28T09:00:00',
-          '2014-01-06T09:00:00',
-          '2014-01-13T09:00:00',
-          '2014-01-20T09:00:00',
-          '2014-01-27T09:00:00',
-          '2015-01-05T09:00:00',
-          '2015-01-12T09:00:00',
-          '2015-01-19T09:00:00',
-          '2015-01-26T09:00:00'
-        ]
+      suite('BYMONTH', function() {
+        testRRULE('FREQ=YEARLY;BYMONTH=3,8,10', {
+          dates: [
+            '2015-08-05T12:00:00',
+            '2015-10-05T12:00:00',
+            '2016-03-05T12:00:00',
+            '2016-08-05T12:00:00',
+          ]
+        });
+        testRRULE('FREQ=YEARLY;BYMONTH=3,8,10;INTERVAL=2', {
+          dates: [
+            '2015-08-05T12:00:00',
+            '2015-10-05T12:00:00',
+            '2017-03-05T12:00:00',
+            '2017-08-05T12:00:00',
+          ]
+        });
+      });
+      suite('BYMONTHDAY', function() {
+        testRRULE('FREQ=YEARLY;BYMONTHDAY=15,20', {
+          dates: [
+            '2015-08-15T12:00:00',
+            '2015-08-20T12:00:00',
+            '2016-08-15T12:00:00',
+            '2016-08-20T12:00:00'
+          ]
+        });
+
+        //Every year the last day of April (rule without BYMONTH)
+        testRRULE('FREQ=YEARLY;BYMONTHDAY=-1', {
+          dates: [
+            '2014-04-30T08:00:00',
+            '2015-04-30T08:00:00',
+            '2016-04-30T08:00:00',
+            '2017-04-30T08:00:00',
+            '2018-04-30T08:00:00',
+            '2019-04-30T08:00:00'
+          ]
+        });
+      });
+      suite('BYMONTH+BYMONTHDAY', function() {
+        testRRULE('FREQ=YEARLY;BYMONTHDAY=15,20;BYMONTH=3,8,10', {
+          dates: [
+            '2015-08-15T12:00:00',
+            '2015-08-20T12:00:00',
+            '2015-10-15T12:00:00',
+            '2015-10-20T12:00:00',
+            '2016-03-15T12:00:00',
+            '2016-03-20T12:00:00'
+          ]
+        });
+        //Every year the last day of February (rule with BYMONTH)
+        testRRULE('FREQ=YEARLY;BYMONTHDAY=-1;BYMONTH=2', {
+          dates: [
+            '2014-02-28T08:00:00',
+            '2015-02-28T08:00:00',
+            '2016-02-29T08:00:00',
+            '2017-02-28T08:00:00',
+            '2018-02-28T08:00:00',
+            '2019-02-28T08:00:00'
+          ]
+        });
       });
 
-      //Every year the last day of February (rule with BYMONTH)
-      testRRULE('FREQ=YEARLY;BYMONTHDAY=-1;BYMONTH=2', {
-        dates: [
-          '2014-02-28T08:00:00',
-          '2015-02-28T08:00:00',
-          '2016-02-29T08:00:00',
-          '2017-02-28T08:00:00',
-          '2018-02-28T08:00:00',
-          '2019-02-28T08:00:00'
-        ]
+      suite('BYDAY+BYMONTHDAY', function() {
+        //yearly, byDay,byMonthday
+        testRRULE('FREQ=YEARLY;BYDAY=+1MO;BYMONTHDAY=7', {
+          dtStart: '2015-01-01T08:00:00',
+          dates: [
+            '2019-01-07T08:00:00'
+          ]
+        });
       });
 
-      //Every year the last day of April (rule without BYMONTH)
-      testRRULE('FREQ=YEARLY;BYMONTHDAY=-1', {
-        dates: [
-          '2014-04-30T08:00:00',
-          '2015-04-30T08:00:00',
-          '2016-04-30T08:00:00',
-          '2017-04-30T08:00:00',
-          '2018-04-30T08:00:00',
-          '2019-04-30T08:00:00'
-        ]
+      suite('BYMONTH+BYDAY', function() {
+        //yearly & by month with one by day
+        testRRULE('FREQ=YEARLY;BYMONTH=3;BYDAY=TU', {
+          dtStart: '1970-03-08T02:00:00',
+          dates: [
+            '1970-03-10T02:00:00'
+          ]
+        });
+
+        //every monday in January, for 3 years
+        testRRULE('FREQ=YEARLY;UNTIL=2015-01-31T09:00:00Z;BYMONTH=1;BYDAY=MO', {
+          dtStart: '2012-05-01T09:00:00',
+          until: true,
+          dates: [
+            '2013-01-07T09:00:00',
+            '2013-01-14T09:00:00',
+            '2013-01-21T09:00:00',
+            '2013-01-28T09:00:00',
+            '2014-01-06T09:00:00',
+            '2014-01-13T09:00:00',
+            '2014-01-20T09:00:00',
+            '2014-01-27T09:00:00',
+            '2015-01-05T09:00:00',
+            '2015-01-12T09:00:00',
+            '2015-01-19T09:00:00',
+            '2015-01-26T09:00:00'
+          ]
+        });
+
+
+
+        //Yearly, every WE and FR of January and March (more BYMONTH and more BYDAY)
+        testRRULE('FREQ=YEARLY;BYMONTH=1,3;BYDAY=WE,FR', {
+          dates: [
+            '2014-01-01T08:00:00', '2014-01-03T08:00:00',
+            '2014-01-08T08:00:00', '2014-01-10T08:00:00',
+            '2014-01-15T08:00:00', '2014-01-17T08:00:00',
+            '2014-01-22T08:00:00', '2014-01-24T08:00:00',
+            '2014-01-29T08:00:00', '2014-01-31T08:00:00',
+            '2014-03-05T08:00:00', '2014-03-07T08:00:00',
+            '2014-03-12T08:00:00', '2014-03-14T08:00:00',
+            '2014-03-19T08:00:00', '2014-03-21T08:00:00',
+            '2014-03-26T08:00:00', '2014-03-28T08:00:00'
+          ]
+        });
+
+        // Yearly, every day of January (one BYMONTH and more BYDAY
+        testRRULE('FREQ=YEARLY;BYMONTH=1;BYDAY=SU,MO,TU,WE,TH,FR,SA', {
+          dates: [
+            '2014-01-01T08:00:00',
+            '2014-01-02T08:00:00',
+            '2014-01-03T08:00:00',
+            '2014-01-04T08:00:00',
+            '2014-01-05T08:00:00',
+            '2014-01-06T08:00:00',
+            '2014-01-07T08:00:00',
+            '2014-01-08T08:00:00',
+            '2014-01-09T08:00:00',
+            '2014-01-10T08:00:00',
+            '2014-01-11T08:00:00',
+            '2014-01-12T08:00:00',
+            '2014-01-13T08:00:00',
+            '2014-01-14T08:00:00',
+            '2014-01-15T08:00:00',
+            '2014-01-16T08:00:00',
+            '2014-01-17T08:00:00',
+            '2014-01-18T08:00:00',
+            '2014-01-19T08:00:00',
+            '2014-01-20T08:00:00',
+            '2014-01-21T08:00:00',
+            '2014-01-22T08:00:00',
+            '2014-01-23T08:00:00',
+            '2014-01-24T08:00:00',
+            '2014-01-25T08:00:00',
+            '2014-01-26T08:00:00',
+            '2014-01-27T08:00:00',
+            '2014-01-28T08:00:00',
+            '2014-01-29T08:00:00',
+            '2014-01-30T08:00:00',
+            '2014-01-31T08:00:00',
+            '2015-01-01T08:00:00'
+          ]
+        });
       });
 
-      //Yearly, every WE and FR of January and March (more BYMONTH and more BYDAY)
-      testRRULE('FREQ=YEARLY;BYMONTH=1,3;BYDAY=WE,FR', {
-        dates: [
-          '2014-01-01T08:00:00', '2014-01-03T08:00:00',
-          '2014-01-08T08:00:00', '2014-01-10T08:00:00',
-          '2014-01-15T08:00:00', '2014-01-17T08:00:00',
-          '2014-01-22T08:00:00', '2014-01-24T08:00:00',
-          '2014-01-29T08:00:00', '2014-01-31T08:00:00',
-          '2014-03-05T08:00:00', '2014-03-07T08:00:00',
-          '2014-03-12T08:00:00', '2014-03-14T08:00:00',
-          '2014-03-19T08:00:00', '2014-03-21T08:00:00',
-          '2014-03-26T08:00:00', '2014-03-28T08:00:00'
-        ]
-      });
+      suite('BYWEEKNO', function() {
+        // Basic byweekno
+        testRRULE('FREQ=YEARLY;BYWEEKNO=2', {
+          dates: [
+            '2015-01-06T08:00:00',
+            '2016-01-12T08:00:00',
+            '2017-01-10T08:00:00',
+            '2018-01-09T08:00:00'
+          ]
+        });
+        // Basic negative byweekno,
+        testRRULE('FREQ=YEARLY;BYWEEKNO=-52', {
+          dates: [
+            '2015-01-06T08:00:00',
+            '2016-01-05T08:00:00',
+            '2017-01-03T08:00:00',
+            '2018-01-02T08:00:00'
+          ]
+        });
+        //yearly, byMonth, byweekNo
+        testRRULE('FREQ=YEARLY;BYMONTH=6,9;BYWEEKNO=23', {
+          dates: [
+            '2015-06-01T08:00:00',
+            '2016-06-06T08:00:00',
+            '2017-06-05T08:00:00',
+            '2018-06-04T08:00:00'
+          ]
+        });
 
-      // Yearly, every day of January (one BYMONTH and more BYDAY
-      testRRULE('FREQ=YEARLY;BYMONTH=1;BYDAY=SU,MO,TU,WE,TH,FR,SA', {
-        dates: [
-          '2014-01-01T08:00:00',
-          '2014-01-02T08:00:00',
-          '2014-01-03T08:00:00',
-          '2014-01-04T08:00:00',
-          '2014-01-05T08:00:00',
-          '2014-01-06T08:00:00',
-          '2014-01-07T08:00:00',
-          '2014-01-08T08:00:00',
-          '2014-01-09T08:00:00',
-          '2014-01-10T08:00:00',
-          '2014-01-11T08:00:00',
-          '2014-01-12T08:00:00',
-          '2014-01-13T08:00:00',
-          '2014-01-14T08:00:00',
-          '2014-01-15T08:00:00',
-          '2014-01-16T08:00:00',
-          '2014-01-17T08:00:00',
-          '2014-01-18T08:00:00',
-          '2014-01-19T08:00:00',
-          '2014-01-20T08:00:00',
-          '2014-01-21T08:00:00',
-          '2014-01-22T08:00:00',
-          '2014-01-23T08:00:00',
-          '2014-01-24T08:00:00',
-          '2014-01-25T08:00:00',
-          '2014-01-26T08:00:00',
-          '2014-01-27T08:00:00',
-          '2014-01-28T08:00:00',
-          '2014-01-29T08:00:00',
-          '2014-01-30T08:00:00',
-          '2014-01-31T08:00:00',
-          '2015-01-01T08:00:00'
-        ]
-      });
-      //yearly, byMonth, byweekNo
-      /* TODO BYWEEKNO is not well supported
-      testRRULE('FREQ=YEARLY;BYMONTH=6,9;BYWEEKNO=23', {
-        dates: [
-          '2015-06-08T08:00:00',
-          '2016-06-06T08:00:00',
-          '2017-06-05T08:00:00',
-          '2018-06-04T08:00:00'
-        ]
-      });
+        //yearly, byMonth, byweekNo negative
+        testRRULE('FREQ=YEARLY;BYMONTH=6,9;BYWEEKNO=-28', {
+          dates: [
+            '2015-06-22T08:00:00',
+            '2016-06-20T08:00:00',
+            '2017-06-19T08:00:00',
+            '2018-06-18T08:00:00'
+          ]
+        });
+/*
+        testRRULE.only('FREQ=YEARLY;BYMONTHDAY=-27,-26,-25,-24,-23;BYWEEKNO=23', {
+          dates: [
+            '2015-06-08T08:00:00',
+            '2016-06-06T08:00:00',
+            '2016-06-07T08:00:00',
+            '2016-06-08T08:00:00',
+            '2017-06-05T08:00:00',
+            '2017-06-06T08:00:00',
+            '2017-06-07T08:00:00',
+            '2017-06-08T08:00:00',
+            '2018-06-04T08:00:00',
+            '2018-06-05T08:00:00',
+          ]
+        });
 
-      //yearly, byMonth, byweekNo negative
-      testRRULE('FREQ=YEARLY;BYMONTH=6,9;BYWEEKNO=-28', {
-        dates: [
-          '2015-06-15T08:00:00',
-          '2016-06-06T08:00:00',
-          '2017-06-05T08:00:00',
-          '2018-06-04T08:00:00'
-        ]
-      });
-      //yearly, negative byweekNo, negative bymonthday
-      testRRULE('FREQ=YEARLY;BYMONTHDAY=-27,-26,-25,-24,-23;BYWEEKNO=-28', {
-        dates: [
-          '2016-06-06T08:00:00',
-          '2016-06-07T08:00:00',
-          '2016-06-08T08:00:00',
-          '2017-06-05T08:00:00',
-          '2017-06-06T08:00:00',
-          '2017-06-07T08:00:00',
-          '2017-06-08T08:00:00',
-          '2018-06-04T08:00:00',
-          '2018-06-05T08:00:00',
-          '2018-06-06T08:00:00',
-          '2018-06-07T08:00:00',
-          '2018-06-08T08:00:00'
-        ]
-      });
+        //yearly, byweekNo, bymonthday
+        testRRULE('FREQ=YEARLY;BYMONTHDAY=4,5,6,7,8;BYWEEKNO=23', {
+          dates: [
+            '2015-06-08T08:00:00',
+            '2016-06-06T08:00:00',
+            '2016-06-07T08:00:00',
+            '2016-06-08T08:00:00',
+            '2017-06-05T08:00:00',
+            '2017-06-06T08:00:00',
+            '2017-06-07T08:00:00',
+            '2017-06-08T08:00:00',
+            '2018-06-04T08:00:00',
+            '2018-06-05T08:00:00',
+            '2018-06-06T08:00:00',
+            '2018-06-07T08:00:00',
+            '2018-06-08T08:00:00'
+          ]
+        });
 
-      //yearly, byweekNo, bymonthday
-      testRRULE('FREQ=YEARLY;BYMONTHDAY=4,5,6,7,8;BYWEEKNO=23', {
-        dates: [
-          '2015-06-08T08:00:00',
-          '2016-06-06T08:00:00',
-          '2016-06-07T08:00:00',
-          '2016-06-08T08:00:00',
-          '2017-06-05T08:00:00',
-          '2017-06-06T08:00:00',
-          '2017-06-07T08:00:00',
-          '2017-06-08T08:00:00',
-          '2018-06-04T08:00:00',
-          '2018-06-05T08:00:00',
-          '2018-06-06T08:00:00',
-          '2018-06-07T08:00:00',
-          '2018-06-08T08:00:00'
-        ]
-      });
-
-      //yearly, negative byweekNo, bymonthday
-      testRRULE('FREQ=YEARLY;BYMONTHDAY=4,5,6,7,8;BYWEEKNO=-28', {
-        dates: [
-          '2016-06-06T08:00:00',
-          '2016-06-07T08:00:00',
-          '2016-06-08T08:00:00',
-          '2017-06-05T08:00:00',
-          '2017-06-06T08:00:00',
-          '2017-06-07T08:00:00',
-          '2017-06-08T08:00:00',
-          '2018-06-04T08:00:00',
-          '2018-06-05T08:00:00',
-          '2018-06-06T08:00:00',
-          '2018-06-07T08:00:00',
-          '2018-06-08T08:00:00'
-        ]
-      });
+        //yearly, negative byweekNo, bymonthday
+        testRRULE('FREQ=YEARLY;BYMONTHDAY=4,5,6,7,8;BYWEEKNO=-28', {
+          dates: [
+            '2016-06-06T08:00:00',
+            '2016-06-07T08:00:00',
+            '2016-06-08T08:00:00',
+            '2017-06-05T08:00:00',
+            '2017-06-06T08:00:00',
+            '2017-06-07T08:00:00',
+            '2017-06-08T08:00:00',
+            '2018-06-04T08:00:00',
+            '2018-06-05T08:00:00',
+            '2018-06-06T08:00:00',
+            '2018-06-07T08:00:00',
+            '2018-06-08T08:00:00'
+          ]
+        });
       */
+    });
 
-      //yearly, byDay,byMonthday
-      testRRULE('FREQ=YEARLY;BYDAY=+1MO;BYMONTHDAY=7', {
-        dtStart: '2015-01-01T08:00:00',
-        dates: [
-          '2019-01-07T08:00:00'
-        ]
-      });
-
+    suite.skip('BYYEARDAY', function() {
       // Tycho brahe days - yearly, byYearDay with negative offsets
       testRRULE('FREQ=YEARLY;BYYEARDAY=1,2,4,6,11,12,20,42,48,49,-306,-303,' +
                 '-293,-292,-266,-259,-258,-239,-228,-209,-168,-164,-134,-133,' +
@@ -1164,27 +1239,9 @@ suite('recur_iterator', function() {
           '2013-03-02T12:00:00',
         ]
       });
-
-      /*
-       * Leap-year test for February 29th
-       *
-       * See https://github.com/mozilla-comm/ical.js/issues/91
-       * for details
-       *
-       * TODO: Uncomment when new recurrence iterator is ready
-       */
-
-      /*
-      testRRULE('FREQ=YEARLY;', {
-        dtStart: '2012-02-29T12:00:00',
-        dates: [
-          '2012-02-29T12:00:00',
-          '2016-02-29T12:00:00'
-        ]
-      });
-      */
     });
-
+    });
+/*
     suite("with timezones", function() {
       testSupport.useTimezones('America/New_York');
 
@@ -1198,9 +1255,8 @@ suite('recur_iterator', function() {
           '2016-11-06T02:30:00'
         ]
       });
-    });
+    });*/
   });
-
 
   suite('#fastForward', function() {
     suite('UNTIL', function() {
@@ -1760,6 +1816,40 @@ suite('recur_iterator', function() {
 
         testFastForward('FREQ=MONTHLY;BYHOUR=12,15;BYMINUTE=0,20;BYSECOND=0,25;BYSETPOS=-1;INTERVAL=10',
                         '2015-08-15T12:00:00', '2015-08-15T15:20:25');
+      });
+    });
+
+    suite("WEEKLY", function() {
+      suite('no extra parts', function() {
+        testFastForward('FREQ=WEEKLY',
+                        '2015-10-02T12:00:00', '2015-10-03T12:00:00');
+        testFastForward('FREQ=WEEKLY;INTERVAL=2',
+                        '2015-08-16T12:00:00', '2015-08-29T12:00:00');
+        testFastForward('FREQ=WEEKLY;INTERVAL=3',
+                        '2015-08-16T12:00:00', '2015-09-05T12:00:00');
+        testFastForward('FREQ=WEEKLY;INTERVAL=5',
+                        '2015-09-03T12:00:00', '2015-09-19T12:00:00');
+      });
+      suite.skip('BYMONTH', function() {
+        testFastForward('FREQ=WEEKLY;BYMONTH=9',
+                        '2015-08-15T12:00:00', '2015-09-05T12:00:00');
+      });
+      suite('BYDAY', function() {
+        testFastForward('FREQ=WEEKLY;BYDAY=SA',
+                        '2015-08-16T12:00:00', '2015-08-22T12:00:00');
+        testFastForward('FREQ=WEEKLY;BYDAY=SU',
+                        '2015-08-17T12:00:00', '2015-08-23T12:00:00');
+        testFastForward('FREQ=WEEKLY;BYDAY=SU',
+                        '2015-08-17T12:00:00', '2015-08-23T12:00:00');
+        testFastForward('FREQ=WEEKLY;BYDAY=TH',
+                        '2015-09-04T12:00:00', '2015-09-10T12:00:00');
+      });
+      //todo BYSETPOS
+    });
+    suite("YEARLY", function() {//todo
+      suite('no extra parts', function() {
+        testFastForward('FREQ=YEARLY',
+                        '2016-01-02T12:00:00', '2016-08-15T12:00:00');
       });
     });
   });

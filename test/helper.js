@@ -210,6 +210,26 @@
     testSupport.require('/test/support/' + lib);
   };
 
+  testSupport.testHelper = function(func) {
+    func.skip = function() {
+      var args = Array.prototype.slice.call(arguments);
+      args.push({
+        test: test.skip,
+        suite: suite.skip
+      });
+      func.apply(undefined, args);
+    }
+    func.only = function() {
+      var args = Array.prototype.slice.call(arguments);
+      args.push({
+        test: test.only,
+        suite: suite.only
+      });
+      func.apply(undefined, args);
+    };
+    return func;
+  };
+
   testSupport.require('/node_modules/benchmark/benchmark.js');
   testSupport.require('/test/support/performance.js');
 
