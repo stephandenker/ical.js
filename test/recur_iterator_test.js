@@ -269,11 +269,15 @@ suite('recur_iterator', function() {
     testRRULE(ruleString, options);
   }
   testFastForward.only = function(ruleString, rangeStart, next) {
-    return testFastForward(ruleString, {
-      rangeStart: rangeStart,
-      dates: [ next ],
-      only: true
-    });
+    var options = rangeStart;
+    if (typeof options === 'string') {
+      options = {
+        rangeStart: rangeStart,
+        dates: [ next ]
+      };
+    }
+    options.only = true;
+    return testFastForward(ruleString, options);
   };
 
   function testFastForwardCount(ruleString, next, count) {
