@@ -169,7 +169,6 @@ suite('recur_iterator', function() {
         start.zone = ICAL.TimezoneService.get(options.dtStartZone);
       }
       var iterator = recur.iterator(start);
-      iterator.duplicates = options.duplicates;
 
       var inc = 0;
       var dates = [];
@@ -407,9 +406,7 @@ suite('recur_iterator', function() {
         });
 
         testRRULE('FREQ=HOURLY;INTERVAL=24;BYYEARDAY=104,-263', {
-          duplicates: true,
           dates: [
-            '2016-04-13T00:00:00',
             '2016-04-13T00:00:00',
             '2017-04-13T00:00:00',
             '2017-04-14T00:00:00',
@@ -837,6 +834,17 @@ suite('recur_iterator', function() {
           '2015-01-31T08:00:00',
           '2015-02-28T08:00:00',
           '2015-03-31T08:00:00'
+        ]
+      });
+
+      testRRULE('FREQ=MONTHLY;BYMONTHDAY=-31,-29,1,3', {
+        dates: [
+          '2015-06-01T08:00:00', // -30 and 1 June
+          '2015-06-02T08:00:00', // -29 and 2
+          '2015-06-03T08:00:00', // -28 and 3
+          '2015-07-01T08:00:00', // -31 and 1 July
+          '2015-07-03T08:00:00', // -29 and 3
+          '2015-08-01T08:00:00', // -31 and 1 August
         ]
       });
 
