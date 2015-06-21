@@ -277,6 +277,49 @@ ICAL.helpers = {
    */
   trunc: function trunc(number) {
     return (number < 0 ? Math.ceil(number) : Math.floor(number));
+  },
+
+  /**
+   * Poor-man's cross-browser inheritance for JavaScript. Doesn't support all
+   * the features, but enough for our usage.
+   *
+   * @param {Function} base     The base class constructor function.
+   * @param {Function} child    The child class constructor function.
+   * @param {Object} extra      Extends the prototype with extra properties
+   *                              and methods
+   */
+  inherits: function(base, child, extra) {
+    function F() {}
+    F.prototype = base.prototype;
+    child.prototype = new F();
+
+    if (extra) {
+      ICAL.helpers.extend(extra, child.prototype);
+    }
+  },
+
+  /**
+   * Poor-man's cross-browser object extension. Doesn't support all the
+   * features, but enough for our usage. Note that the target's properties are
+   * always overwritten with the source properties.
+   *
+   * @example
+   * var child = ICAL.helpers.extend(parent, {
+   *   "bar": 123
+   * });
+   *
+   * @param {Object} source     The object to extend
+   * @param {Object} target     The object to extend with
+   * @return {Object}           Returns the target.
+   */
+  extend: function(source, target) {
+    for (var key in source) {
+      var descr = Object.getOwnPropertyDescriptor(source, key);
+      if (descr) {
+        Object.defineProperty(target, key, descr);
+      }
+    }
+    return target;
   }
 };
 /* This Source Code Form is subject to the terms of the Mozilla Public
@@ -550,8 +593,7 @@ ICAL.design = (function() {
   };
 
   // When adding a value here, be sure to add it to the parameter types!
-  var icalValues = {
-    __proto__: commonValues,
+  var icalValues = ICAL.helpers.extend(commonValues, {
 
     "binary": {
       decorate: function(aString) {
@@ -779,10 +821,9 @@ ICAL.design = (function() {
         return result;
       }
     }
-  };
+  });
 
-  var icalProperties = {
-    __proto__: commonProperties,
+  var icalProperties = ICAL.helpers.extend(commonProperties, {
 
     "action": DEFAULT_TYPE_TEXT,
     "attach": { defaultType: "uri" },
@@ -841,11 +882,10 @@ ICAL.design = (function() {
     "tzurl": DEFAULT_TYPE_URI,
     "tzid": DEFAULT_TYPE_TEXT,
     "tzname": DEFAULT_TYPE_TEXT
-  };
+  });
 
   // When adding a value here, be sure to add it to the parameter types!
-  var vcardValues = {
-    __proto__: commonValues,
+  var vcardValues = ICAL.helpers.extend(commonValues, {
 
     date: {
       decorate: function(aValue) {
@@ -990,7 +1030,7 @@ ICAL.design = (function() {
     "language-tag": {
       matches: /^[a-zA-Z0-9\-]+$/ // Could go with a more strict regex here
     }
-  };
+  });
 
   var vcardParams = {
     "type": {
@@ -1007,9 +1047,7 @@ ICAL.design = (function() {
     }
   };
 
-  var vcardProperties = {
-    __proto__: commonProperties,
-
+  var vcardProperties = ICAL.helpers.extend(commonProperties, {
     "adr": DEFAULT_TYPE_TEXT_STRUCTURED,
     "anniversary": DEFAULT_TYPE_DATE_ANDOR_TIME,
     "bday": DEFAULT_TYPE_DATE_ANDOR_TIME,
@@ -1041,7 +1079,7 @@ ICAL.design = (function() {
     "title": DEFAULT_TYPE_TEXT,
     "tz": { defaultType: "text", allowedTypes: ["text", "utc-offset", "uri"] },
     "xml": DEFAULT_TYPE_TEXT
-  };
+  });
 
 
   /**
@@ -1474,19 +1512,20 @@ ICAL.parse = (function() {
    */
   function ParserError(message) {
     this.message = message;
+    this.name = 'ParserError';
 
     try {
       throw new Error();
     } catch (e) {
-      var split = e.stack.split('\n');
-      split.shift();
-      this.stack = split.join('\n');
+      if (e.stack) {
+        var split = e.stack.split('\n');
+        split.shift();
+        this.stack = split.join('\n');
+      }
     }
   }
 
-  ParserError.prototype = {
-    __proto__: Error.prototype
-  };
+  ParserError.prototype = Error.prototype;
 
   /**
    * Parses iCalendar or vCard data into a raw jCal object. Consult
@@ -4829,7 +4868,7 @@ ICAL.TimezoneService = (function() {
 
     /**
      * First calculates the start of the week, then returns the day of year for
-     * this date.
+     * this date. If the day falls into the previous year, the day is zero or negative.
      *
      * @param {ICAL.Time.weekDay=} aFirstDayOfWeek
      *        The week start weekday, defaults to SUNDAY
@@ -4967,13 +5006,16 @@ ICAL.TimezoneService = (function() {
     },
 
     /**
-     * Calculates the ISO 8601 week number. If Monday is the week start day,
-     * the first week of a year is the week that contains the first Thursday.
-     * The year can have 53 weeks, if January 1st is a Friday.
+     * Calculates the ISO 8601 week number. The first week of a year is the
+     * week that contains the first Thursday. The year can have 53 weeks, if
+     * January 1st is a Friday.
      *
-     * If the week start is specified as a different weekday, the calculation
-     * is shifted.
+     * Note there are regions where the first week of the year is the one that
+     * starts on January 1st, which may offset the week number. Also, if a
+     * different week start is specified, this will also affect the week
+     * number.
      *
+     * @see ICAL.Time.weekOneStarts
      * @param {ICAL.Time.weekDay} aWeekStart        The weekday the week starts with
      * @return {Number}                             The ISO week number
      */
@@ -4984,17 +5026,14 @@ ICAL.TimezoneService = (function() {
       }
       // This function courtesty of Julian Bucknall, published under the MIT license
       // http://www.boyet.com/articles/publishedarticles/calculatingtheisoweeknumb.html
-      var doy = this.dayOfYear();
-      var dow = this.dayOfWeek();
-      var year = this.year;
+      // plus some fixes to be able to use different week starts.
       var week1;
 
       var dt = this.clone();
       dt.isDate = true;
-      var first_dow = dt.dayOfWeek();
       var isoyear = this.year;
 
-      if (dt.month == 12 && dt.day > 28) {
+      if (dt.month == 12 && dt.day > 25) {
         week1 = ICAL.Time.weekOneStarts(isoyear + 1, aWeekStart);
         if (dt.compare(week1) < 0) {
           week1 = ICAL.Time.weekOneStarts(isoyear, aWeekStart);
@@ -5644,20 +5683,29 @@ ICAL.TimezoneService = (function() {
    * Returns the date on which ISO week number 1 starts.
    *
    * @see ICAL.Time#weekNumber
-   * @param {Number} aYear          The year to search in
-   * @param {ICAL.Time.weekDay=}    The week start weekday, used for calculation.
-   * @return {ICAL.Time}            The date on which week number 1 starts
+   * @param {Number} aYear                  The year to search in
+   * @param {ICAL.Time.weekDay=} aWeekStart The week start weekday, used for calculation.
+   * @return {ICAL.Time}                    The date on which week number 1 starts
    */
   ICAL.Time.weekOneStarts = function weekOneStarts(aYear, aWeekStart) {
     var t = ICAL.Time.fromData({
       year: aYear,
       month: 1,
-      day: 4,
+      day: 1,
       isDate: true
     });
 
-    var fourth_dow = t.dayOfWeek();
-    t.day += (1 - fourth_dow) + ((aWeekStart || ICAL.Time.SUNDAY) - 1);
+    var dow = t.dayOfWeek();
+    var wkst = aWeekStart || ICAL.Time.DEFAULT_WEEK_START;
+    if (dow > ICAL.Time.THURSDAY) {
+      t.day += 7;
+    }
+    if (wkst > ICAL.Time.THURSDAY) {
+      t.day -= 7;
+    }
+
+    t.day -= dow - wkst;
+
     return t;
   };
 
@@ -5789,9 +5837,7 @@ ICAL.TimezoneService = (function() {
 
     this.fromData(data, zone);
   };
-
-  ICAL.VCardTime.prototype = {
-    __proto__: ICAL.Time.prototype,
+  ICAL.helpers.inherits(ICAL.Time, ICAL.VCardTime, {
 
     /**
      * The class identifier.
@@ -5894,7 +5940,7 @@ ICAL.TimezoneService = (function() {
       }
       return null;
     }
-  };
+  });
 
   /**
    * Returns a new ICAL.VCardTime instance from a date and/or time string.
