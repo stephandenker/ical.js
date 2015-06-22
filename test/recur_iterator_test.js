@@ -135,10 +135,7 @@ suite('recur_iterator', function() {
 
         by_data_byday: [[0, "MO"], [0, "TU"], [0, "WE"], [0, "TH"], [0, "FR"], [0, "SA"], [0, "SU"]],
         by_cache_year: 0,
-        by_cache: [],
-        by_indices: iterator.by_indices,
-        days: iterator.days,
-        days_index: iterator.days_index,
+        by_cache: []
       };
 
       var json = iterator.toJSON();

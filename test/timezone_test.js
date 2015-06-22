@@ -2,13 +2,13 @@ suite('timezone', function() {
   var icsData;
   var timezone;
 
-  function timezoneTest(tzid, name, testCb) {
+  var timezoneTest = testSupport.testHelper(function(runner, tzid, name, testCb) {
     if (typeof(name) === 'function') {
       testCb = name;
       name = 'parse';
     }
 
-    suite(tzid, function() {
+    runner.suite(tzid, function() {
       if (tzid == "UTC") {
         setup(function() {
           timezone = ICAL.Timezone.utcTimezone;
@@ -33,7 +33,7 @@ suite('timezone', function() {
 
       test(name, testCb);
     });
-  }
+  });
 
   function utcHours(time) {
     var seconds = timezone.utcOffset(
@@ -46,6 +46,7 @@ suite('timezone', function() {
 
   var sanityChecks = [
     {
+      skip: true,
       // just before US DST
       time: { year: 2012, month: 3, day: 11, hour: 1, minute: 59 },
       offsets: {
@@ -152,7 +153,7 @@ suite('timezone', function() {
   sanityChecks.forEach(function(item) {
     var title = 'time: ' + JSON.stringify(item.time);
 
-    suite(title, function() {
+    (item.skip ? suite.skip : suite)(title, function() {
       for (var tzid in item.offsets) {
         timezoneTest(tzid, tzid + " offset " + item.offsets[tzid], function(tzid) {
           assert.equal(
@@ -212,7 +213,7 @@ suite('timezone', function() {
   });
 
   suite('#convertTime', function() {
-    timezoneTest('America/Los_Angeles', 'convert date-time from utc', function() {
+    timezoneTest.skip('America/Los_Angeles', 'convert date-time from utc', function() {
       var subject = new ICAL.Time.fromString('2012-03-11T01:59:00Z');
       var subject2 = subject.convertToZone(timezone);
       assert.equal(subject2.zone.tzid, timezone.tzid);
