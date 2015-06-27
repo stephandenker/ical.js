@@ -1646,6 +1646,20 @@ suite('icaltime', function() {
       );
     });
 
+    suite("weekNumber", function() {
+      test('cache', function() {
+        ICAL.Time._wnCache = {};
+        var dt1 = ICAL.Time.fromString("2012-12-31");
+        var dt2 = ICAL.Time.fromString("2013-01-01");
+        var dt3 = ICAL.Time.fromString("2013-01-01");
+
+        dt1.weekNumber(ICAL.Time.SATURDAY);
+        dt2.weekNumber(ICAL.Time.SATURDAY);
+        dt3.weekNumber(ICAL.Time.SATURDAY);
+        assert.lengthOf(Object.keys(ICAL.Time._wnCache), 2);
+      });
+    });
+
     suite("weekOneStarts", function() {
       var testWeekOne = testSupport.testHelper(function(runner, year, dates) {
         var dom = ICAL.Time.getDominicalLetter(year);
