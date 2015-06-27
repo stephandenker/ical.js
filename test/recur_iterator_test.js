@@ -280,6 +280,20 @@ suite('recur_iterator', function() {
   });
 
   suite("#recurrence rules", function() {
+    suite("failures", function() {
+      test('H/M/SECONDLY with DATE', function() {
+        var start = ICAL.Time.fromString('2012-02-01');
+        assert.throws(function() {
+          ICAL.Recur.fromString("FREQ=SECONDLY").iterator(start);
+        }, "Cannot expand SECONDLY without a date-time");
+        assert.throws(function() {
+          ICAL.Recur.fromString("FREQ=MINUTELY").iterator(start);
+        }, "Cannot expand MINUTELY without a date-time");
+        assert.throws(function() {
+          ICAL.Recur.fromString("FREQ=HOURLY").iterator(start);
+        }, "Cannot expand HOURLY without a date-time");
+      });
+    });
     suite('SECONDLY/MINUTELY', function() {
       // Simple secondly
       testRRULE('FREQ=SECONDLY;INTERVAL=3;COUNT=3', {
