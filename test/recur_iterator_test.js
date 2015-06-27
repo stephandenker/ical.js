@@ -876,6 +876,21 @@ suite('recur_iterator', function() {
             '1997-11-06T09:00:00'
           ]
         });
+
+        testRRULE('FREQ=MONTHLY;BYDAY=TH;BYSETPOS=1,5', {
+          dates: [
+            '2015-06-04T09:00:00',
+            '2015-07-02T09:00:00',
+            '2015-07-30T09:00:00',
+            '2015-08-06T09:00:00'
+          ]
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=TH;BYSETPOS=5', {
+          dates: [
+            '2015-04-30T09:00:00',
+            '2015-07-30T09:00:00'
+          ]
+        });
       });
 
       suite('BYYEARDAY+BYDAY', function() {
