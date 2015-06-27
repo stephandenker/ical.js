@@ -154,6 +154,148 @@ suite('recur_iterator', function() {
 
   });
 
+  suite('ByComponentIterator', function() {
+    var ByComponentIterator = ICAL.RecurIterator._ByComponentIterator;
+
+    test('initialization', function() {
+      var it = new ByComponentIterator([1,2,3]);
+      assert.deepEqual(it.arr, [1,2,3]);
+      assert.equal(it.idx, 0);
+      assert.isFalse(it.wrapped);
+
+      it = new ByComponentIterator([1]);
+      assert.deepEqual(it.arr, [1]);
+      assert.equal(it.idx, 0);
+      assert.isTrue(it.wrapped);
+    });
+    test('#_postitiveArr', function() {
+      var it = new ByComponentIterator([1,-2,3]);
+      it.max = 3;
+      assert.deepEqual(it._positiveArr, [1,2,3]);
+    });
+
+    test('#max', function() {
+      var it = new ByComponentIterator([1,-2,3]);
+      it.max = 3;
+      assert.deepEqual(it.arr, [1,-2,3]);
+
+      it.max = 5;
+      assert.deepEqual(it.arr, [1,3,-2]);
+
+      // don't sort when value doesn't change
+      it.arr = [1,-2,3];
+      it.max = 5;
+      assert.deepEqual(it.arr, [1,-2,3]);
+      assert.equal(it.max, 5);
+    });
+
+    test('#has', function() {
+      var it = new ByComponentIterator([1,-2,3]);
+      assert.isFalse(it.has(2));
+
+      it.max = 3;
+      assert.isTrue(it.has(2));
+      assert.isTrue(it.has(1));
+      assert.isTrue(it.has(-3));
+    });
+    test('#next', function() {
+      var it = new ByComponentIterator([1,-2,3]);
+      assert.equal(it.peek(), 1);
+      assert.equal(it.peekNext(), -2);
+      assert.equal(it.peekPrev(), 3);
+      assert.isFalse(it.prevWraps);
+      assert.isFalse(it.wrapped);
+      assert.isFalse(it.nextWraps);
+
+      it.next();
+      assert.equal(it.peek(), -2);
+      assert.equal(it.peekNext(), 3);
+      assert.equal(it.peekPrev(), 1);
+      assert.isTrue(it.prevWraps);
+      assert.isFalse(it.wrapped);
+      assert.isFalse(it.nextWraps);
+
+      it.next();
+      assert.equal(it.peek(), 3);
+      assert.equal(it.peekNext(), 1);
+      assert.equal(it.peekPrev(), -2);
+      assert.isFalse(it.prevWraps);
+      assert.isFalse(it.wrapped);
+      assert.isTrue(it.nextWraps);
+
+      it.next();
+      assert.equal(it.peek(), 1);
+      assert.equal(it.peekNext(), -2);
+      assert.equal(it.peekPrev(), 3);
+      assert.isFalse(it.prevWraps);
+      assert.isTrue(it.wrapped);
+      assert.isFalse(it.nextWraps);
+    });
+    test('#prev', function() {
+      var it = new ByComponentIterator([1,-2,3]);
+      assert.equal(it.peek(), 1);
+      assert.equal(it.peekNext(), -2);
+      assert.equal(it.peekPrev(), 3);
+      assert.isFalse(it.prevWraps);
+      assert.isFalse(it.wrapped);
+      assert.isFalse(it.nextWraps);
+
+      it.prev();
+      assert.equal(it.peek(), 3);
+      assert.equal(it.peekNext(), 1);
+      assert.equal(it.peekPrev(), -2);
+      assert.isFalse(it.prevWraps);
+      assert.isTrue(it.wrapped);
+      assert.isTrue(it.nextWraps);
+
+      it.prev();
+      assert.equal(it.peek(), -2);
+      assert.equal(it.peekNext(), 3);
+      assert.equal(it.peekPrev(), 1);
+      assert.isTrue(it.prevWraps);
+      assert.isFalse(it.wrapped);
+      assert.isFalse(it.nextWraps);
+
+      it.prev();
+      assert.equal(it.peek(), 1);
+      assert.equal(it.peekNext(), -2);
+      assert.equal(it.peekPrev(), 3);
+      assert.isFalse(it.prevWraps);
+      assert.isFalse(it.wrapped);
+      assert.isFalse(it.nextWraps);
+    });
+    test('#toJSON', function() {
+      var it = new ByComponentIterator([1,-2,3]);
+      assert.deepEqual(it.toJSON(), {
+        arr: [1, -2, 3],
+        idx: 0,
+        wrapped: false
+      });
+
+      it.max = 3;
+      assert.deepEqual(it.toJSON(), {
+        arr: [1, -2, 3],
+        idx: 0,
+        wrapped: false,
+        max: 3
+      });
+    });
+    test('fromJSON', function() {
+      var data = {
+        arr: [1, -2, 3],
+        idx: 0,
+        wrapped: false,
+        max: 3
+      }
+      var it = ByComponentIterator.fromJSON(data);
+      assert.deepEqual(it.toJSON(), data);
+      assert.deepEqual(it.arr, [1, -2, 3]);
+      assert.equal(it.idx, 0);
+      assert.isFalse(it.wrapped);
+      assert.equal(it.max, 3);
+    });
+  });
+
   var testRRULE = testSupport.testHelper(function(runner, ruleString, options) {
     runner.test(options.description || ruleString, function() {
       if (!options.dtStart) {
