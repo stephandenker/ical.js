@@ -1,80 +1,38 @@
 suite('recur_iterator', function() {
-  var Time = ICAL.Time;
-  var Recur = ICAL.Recur;
-
-  function addDates(expected, year, month, dates) {
-    dates.forEach(function(date) {
-      expected.push(new Date(
-        year, month, date, 9
-      ));
+  suite('initialization', function() {
+    test('missing rule', function() {
+      assert.throws(function() {
+        new ICAL.RecurIterator({
+          dtstart: ICAL.Time.fromString('2015-01-01T01:01:01')
+        });
+      }, "iterator requires a (ICAL.Recur) rule");
     });
-  }
+    test('missing dtstart', function() {
+      assert.throws(function() {
+        new ICAL.RecurIterator({
+          rule: new ICAL.Recur()
+        });
+      }, "iterator requires a (ICAL.Time) dtstart");
+    });
+  });
+  suite('#toString', function() {
+    test('contains important properties', function() {
+      var start = ICAL.Time.fromString('2012-02-01T09:00:00');
+      recur = ICAL.Recur.fromString('FREQ=MONTHLY;COUNT=12;INTERVAL=3');
+      iterator = recur.iterator(start);
+      iterator.next();
 
-  function createDay(date) {
-    return new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate()
-    );
-  }
-
-  function isSameDate(first, second) {
-    return first.getMonth() == second.getMonth() &&
-           first.getDate() == second.getDate() &&
-           first.getFullYear() == second.getFullYear();
-  }
-
-  // taken from gaia calendar app
-  function datesBetween(start, end, includeTime) {
-    var list = [];
-    var last = start.getDate();
-    var cur;
-
-    while (true) {
-      var next = new Date(
-        start.getFullYear(),
-        start.getMonth(),
-        ++last
-      );
-
-      if (next > end) {
-        throw new Error(
-          'sanity fails next is greater then end'
-        );
-      }
-
-      if (!isSameDate(next, end)) {
-        list.push(next);
-        continue;
-      }
-
-      break;
-    }
-
-    if (includeTime) {
-      list.unshift(start);
-      list.push(end);
-    } else {
-      list.unshift(createDay(start));
-      list.push(createDay(end));
-    }
-
-    return list;
-  }
-
-  function getDaysIn(month) {
-    var start = new Date(
-      month.getFullYear(),
-      month.getMonth(),
-      1
-    );
-    var end = new Date(start.valueOf());
-    end.setMonth(start.getMonth() + 1);
-    end.setMilliseconds(-1);
-
-    return datesBetween(start, end);
-  }
-
+      var str = iterator.toString();
+      assert.include(str, "RULE: FREQ=MONTHLY;COUNT=12;INTERVAL=3");
+      assert.include(str, "DTSTART: 2012-02-01T09:00:00");
+      assert.include(str, "2012-02-01T09:00:00");
+      assert.include(str, "BYMONTH: 1,*2,3,4,5,6,7,8,9,10,11,12");
+      assert.include(str, "BYMONTHDAY: *1");
+      assert.include(str, "BYHOUR: *9");
+      assert.include(str, "BYMINUTE: *0");
+      assert.include(str, "BYSECOND: *0");
+    });
+  });
   suite('#toJSON', function() {
     var recur, iterator;
 
@@ -150,6 +108,20 @@ suite('recur_iterator', function() {
           'iterator equality #' + inc
         );
       }
+    });
+
+    test('cached occurrences', function() {
+      iterator.next();
+      var json = iterator.toJSON();
+      json.by_cache = [
+        '2012-05-01T09:00:00',
+        // skipping this one, for the test: '2012-08-01T09:00:00'
+        '2012-11-01T09:00:00'
+      ];
+      var newIter = new ICAL.RecurIterator(json);
+
+      assert.equal(newIter.next().toString(), '2012-05-01T09:00:00');
+      assert.equal(newIter.next().toString(), '2012-11-01T09:00:00');
     });
 
   });
@@ -1406,6 +1378,17 @@ suite('recur_iterator', function() {
   });
 
   suite('#fastForward', function() {
+    suite('failures', function() {
+      test('before DTSTART', function() {
+        var start = ICAL.Time.fromString('2012-02-01T09:00:00');
+        var recur = ICAL.Recur.fromString("FREQ=DAILY");
+        var iterator = recur.iterator(start);
+        assert.throws(function() {
+          var rangeStart = ICAL.Time.fromString('1990-02-01T09:00:00');
+          iterator.fastForward(rangeStart);
+        }, "Can't fastForward before DTSTART");
+      });
+    });
     suite('UNTIL', function() {
       testFastForward('FREQ=DAILY;UNTIL=2015-08-16T12:00:00', {
         description: 'rangeStart falls on UNTIL',
@@ -1613,6 +1596,12 @@ suite('recur_iterator', function() {
         testFastForward('FREQ=MINUTELY;BYYEARDAY=104,227', {
           rangeStart: '2015-09-04T12:30:00',
           dates: [ '2016-04-13T00:00:00' ]
+        });
+      });
+      suite('BYHOUR', function() {
+        testFastForward('FREQ=MINUTELY;BYHOUR=12,14', {
+          rangeStart: '2015-08-15T13:59:01',
+          dates: [ '2015-08-15T14:00:00' ]
         });
       });
       suite("BYHOUR+BYMINUTE+BYSECOND+BYDAY+BYMONTH+BYMONTHDAY", function() {
