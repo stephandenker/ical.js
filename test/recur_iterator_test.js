@@ -81,6 +81,7 @@ suite('recur_iterator', function() {
         by_data: iterator.by_data,
         last: null,
         occurrence_number: iterator.occurrence_number,
+        yearlyWithBydayPrefix: iterator.yearlyWithBydayPrefix,
 
         by_iter: {
           BYMONTH: { arr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], idx: 0, wrapped: false },
@@ -633,138 +634,218 @@ suite('recur_iterator', function() {
     });
 
     suite('WEEKLY', function() {
-      // weekly until
-      testRRULE('FREQ=WEEKLY;UNTIL=2012-04-24T06:59:59Z;BYDAY=TU', {
-        noDate: true,
-        until: true,
-        dates: [
-          '2012-04-10T09:00:00',
-          '2012-04-17T09:00:00'
-        ]
-      });
-      //weekly for 10 occurrences
-      testRRULE('FREQ=WEEKLY;COUNT=10', {
-        byCount: true,
-        dates: [
-          '2012-01-05T09:00:00',
-          '2012-01-12T09:00:00',
-          '2012-01-19T09:00:00',
-          '2012-01-26T09:00:00',
-          '2012-02-02T09:00:00',
-          '2012-02-09T09:00:00',
-          '2012-02-16T09:00:00',
-          '2012-02-23T09:00:00',
-          '2012-03-01T09:00:00',
-          '2012-03-08T09:00:00'
-        ]
+      suite('no extra parts + misc.', function() {
+        testRRULE('FREQ=WEEKLY', {
+          dates: [
+            '2014-01-01T09:00:00',
+            '2014-01-08T09:00:00',
+            '2014-01-15T09:00:00',
+            '2014-01-22T09:00:00',
+            '2014-01-29T09:00:00',
+            '2014-02-05T09:00:00',
+          ]
+        });
+                // weekly until
+        testRRULE('FREQ=WEEKLY;UNTIL=2012-04-24T06:59:59Z;BYDAY=TU', {
+          noDate: true,
+          until: true,
+          dates: [
+            '2012-04-10T09:00:00',
+            '2012-04-17T09:00:00'
+          ]
+        });
+        //weekly for 10 occurrences
+        testRRULE('FREQ=WEEKLY;COUNT=10', {
+          byCount: true,
+          dates: [
+            '2012-01-05T09:00:00',
+            '2012-01-12T09:00:00',
+            '2012-01-19T09:00:00',
+            '2012-01-26T09:00:00',
+            '2012-02-02T09:00:00',
+            '2012-02-09T09:00:00',
+            '2012-02-16T09:00:00',
+            '2012-02-23T09:00:00',
+            '2012-03-01T09:00:00',
+            '2012-03-08T09:00:00'
+          ]
+        });
+
+        //Weekly until December 24, 2012'
+        testRRULE('FREQ=WEEKLY;UNTIL=2012-12-24T00:00:00Z', {
+          until: true,
+          dates: [
+            '2012-11-15T00:00:00',
+            '2012-11-22T00:00:00',
+            '2012-11-29T00:00:00',
+            '2012-12-06T00:00:00',
+            '2012-12-13T00:00:00',
+            '2012-12-20T00:00:00'
+          ]
+        });
+
+        //every other week forever'
+        testRRULE('FREQ=WEEKLY;INTERVAL=2;WKST=SU', {
+          dates: [
+            '2012-01-15T09:00:00',
+            '2012-01-29T09:00:00',
+            '2012-02-12T09:00:00'
+          ]
+        });
+
+        //weekly on tuesday and thursday for five weeks
+        testRRULE('FREQ=WEEKLY;COUNT=4;WKST=SU;BYDAY=TU,TH', {
+          dtStart: '2012-01-01T09:00:00',
+          byCount: true,
+          dates: [
+            '2012-01-03T09:00:00',
+            '2012-01-05T09:00:00',
+            '2012-01-10T09:00:00',
+            '2012-01-12T09:00:00'
+          ]
+        });
+
+        //every other week on mo,we,fi until dec 24th 1997
+        testRRULE('FREQ=WEEKLY;INTERVAL=2;UNTIL=1997-12-24T09:00:00Z;WKST=SU;BYDAY=MO,WE,FR', {
+          until: true,
+          dates: [
+            '1997-09-01T09:00:00', '1997-09-03T09:00:00', '1997-09-05T09:00:00',
+            '1997-09-15T09:00:00', '1997-09-17T09:00:00', '1997-09-19T09:00:00',
+            '1997-09-29T09:00:00', '1997-10-01T09:00:00', '1997-10-03T09:00:00',
+            '1997-10-13T09:00:00', '1997-10-15T09:00:00', '1997-10-17T09:00:00',
+            '1997-10-27T09:00:00', '1997-10-29T09:00:00', '1997-10-31T09:00:00',
+            '1997-11-10T09:00:00', '1997-11-12T09:00:00', '1997-11-14T09:00:00',
+            '1997-11-24T09:00:00', '1997-11-26T09:00:00', '1997-11-28T09:00:00',
+            '1997-12-08T09:00:00', '1997-12-10T09:00:00', '1997-12-12T09:00:00',
+            '1997-12-22T09:00:00', '1997-12-24T09:00:00'
+          ]
+        });
+
+        //weekly WKST changes output'
+        //MO
+        testRRULE('FREQ=WEEKLY;INTERVAL=2;COUNT=4;BYDAY=TU,SU;WKST=MO', {
+          byCount: true,
+          dates: [
+            '1997-08-05T09:00:00',
+            '1997-08-10T09:00:00',
+            '1997-08-19T09:00:00',
+            '1997-08-24T09:00:00'
+          ]
+        });
+
+        //'weekly WKST changes output'
+        //SU
+        testRRULE('FREQ=WEEKLY;INTERVAL=2;COUNT=4;BYDAY=TU,SU;WKST=SU', {
+          byCount: true,
+          dates: [
+            '1997-08-05T09:00:00',
+            '1997-08-17T09:00:00',
+            '1997-08-19T09:00:00',
+            '1997-08-31T09:00:00'
+          ]
+        });
       });
 
-      //Weekly until December 24, 2012'
-      testRRULE('FREQ=WEEKLY;UNTIL=2012-12-24T00:00:00Z', {
-        until: true,
-        dates: [
-          '2012-11-15T00:00:00',
-          '2012-11-22T00:00:00',
-          '2012-11-29T00:00:00',
-          '2012-12-06T00:00:00',
-          '2012-12-13T00:00:00',
-          '2012-12-20T00:00:00'
-        ]
+      suite('BYMONTH', function() {
+        testRRULE('FREQ=WEEKLY;BYMONTH=12', {
+          dates: [
+            //'2015-08-15T09:00:00', todo
+            '2015-12-05T09:00:00',
+            '2015-12-12T09:00:00',
+          ]
+        });
+        testRRULE('FREQ=WEEKLY;BYMONTH=1,6,8,12', {
+          dates: [
+            '2015-08-15T09:00:00',
+            '2015-08-22T09:00:00',
+            '2015-08-29T09:00:00',
+            '2015-12-05T09:00:00',
+            '2015-12-12T09:00:00',
+            '2015-12-19T09:00:00',
+            '2015-12-26T09:00:00',
+            '2016-01-02T09:00:00',
+          ]
+        });
       });
-
-      //every other week forever'
-      testRRULE('FREQ=WEEKLY;INTERVAL=2;WKST=SU', {
-        dates: [
-          '2012-01-15T09:00:00',
-          '2012-01-29T09:00:00',
-          '2012-02-12T09:00:00'
-        ]
+      suite('BYDAY', function() {
+        // weekly on tuesday
+        testRRULE('FREQ=WEEKLY;BYDAY=TU', {
+          dates: [
+            '2012-09-11T09:00:00',
+            '2012-09-18T09:00:00',
+            '2012-09-25T09:00:00',
+            '2012-10-02T09:00:00',
+            '2012-10-09T09:00:00'
+          ]
+        });
+        //buisness days for 31 occurances'
+        testRRULE('FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', {
+          dates: [
+            '2012-01-02T09:00:00', '2012-01-03T09:00:00', '2012-01-04T09:00:00', '2012-01-05T09:00:00', '2012-01-06T09:00:00',
+            '2012-01-09T09:00:00', '2012-01-10T09:00:00', '2012-01-11T09:00:00', '2012-01-12T09:00:00', '2012-01-13T09:00:00',
+            '2012-01-16T09:00:00', '2012-01-17T09:00:00', '2012-01-18T09:00:00', '2012-01-19T09:00:00', '2012-01-20T09:00:00',
+            '2012-01-23T09:00:00', '2012-01-24T09:00:00', '2012-01-25T09:00:00', '2012-01-26T09:00:00', '2012-01-27T09:00:00',
+            '2012-01-30T09:00:00', '2012-01-31T09:00:00', '2012-02-01T09:00:00', '2012-02-02T09:00:00', '2012-02-03T09:00:00',
+            '2012-02-06T09:00:00', '2012-02-07T09:00:00', '2012-02-08T09:00:00', '2012-02-09T09:00:00', '2012-02-10T09:00:00',
+            '2012-02-13T09:00:00'
+          ]
+        });
       });
-
-      //weekly on tuesday and thursday for five weeks
-      testRRULE('FREQ=WEEKLY;COUNT=4;WKST=SU;BYDAY=TU,TH', {
-        dtStart: '2012-01-01T09:00:00',
-        byCount: true,
-        dates: [
-          '2012-01-03T09:00:00',
-          '2012-01-05T09:00:00',
-          '2012-01-10T09:00:00',
-          '2012-01-12T09:00:00'
-        ]
+      suite('BYHOUR, BYMINUTE, BYSECOND', function() {
+        testRRULE('FREQ=WEEKLY;BYHOUR=9,12', {
+          dates: [
+            '2015-08-15T09:00:00',
+            '2015-08-15T12:00:00',
+            '2015-08-22T09:00:00',
+            '2015-08-22T12:00:00',
+          ]
+        });
+        testRRULE('FREQ=WEEKLY;BYMINUTE=0,9,12', {
+          dates: [
+            '2015-08-15T09:00:00',
+            '2015-08-15T09:09:00',
+            '2015-08-15T09:12:00',
+            '2015-08-22T09:00:00',
+          ]
+        });
+        testRRULE('FREQ=WEEKLY;BYSECOND=0,9,12', {
+          dates: [
+            '2015-08-15T09:00:00',
+            '2015-08-15T09:00:09',
+            '2015-08-15T09:00:12',
+            '2015-08-22T09:00:00',
+          ]
+        });
+        testRRULE('FREQ=WEEKLY;BYHOUR=12,13;BYMINUTE=0;BYSECOND=10,45', {
+          dates: [
+            '2015-08-15T12:00:10',
+            '2015-08-15T12:00:45',
+            '2015-08-15T13:00:10',
+            '2015-08-15T13:00:45',
+            '2015-08-22T12:00:10',
+          ]
+        });
       });
-
-      //every other week on mo,we,fi until dec 24th 1997
-      testRRULE('FREQ=WEEKLY;INTERVAL=2;UNTIL=1997-12-24T09:00:00Z;WKST=SU;BYDAY=MO,WE,FR', {
-        until: true,
-        dates: [
-          '1997-09-01T09:00:00', '1997-09-03T09:00:00', '1997-09-05T09:00:00',
-          '1997-09-15T09:00:00', '1997-09-17T09:00:00', '1997-09-19T09:00:00',
-          '1997-09-29T09:00:00', '1997-10-01T09:00:00', '1997-10-03T09:00:00',
-          '1997-10-13T09:00:00', '1997-10-15T09:00:00', '1997-10-17T09:00:00',
-          '1997-10-27T09:00:00', '1997-10-29T09:00:00', '1997-10-31T09:00:00',
-          '1997-11-10T09:00:00', '1997-11-12T09:00:00', '1997-11-14T09:00:00',
-          '1997-11-24T09:00:00', '1997-11-26T09:00:00', '1997-11-28T09:00:00',
-          '1997-12-08T09:00:00', '1997-12-10T09:00:00', '1997-12-12T09:00:00',
-          '1997-12-22T09:00:00', '1997-12-24T09:00:00'
-        ]
-      });
-
-      /* TODO byweekno is not well supported
-      testRRULE('FREQ=WEEKLY;BYWEEKNO=2,4,6', {
-        dates: [
-          '2015-01-11T08:00:00', // TODO the first occurrence is given twice
-          '2015-01-12T08:00:00', '2015-01-26T08:00:00', '2015-02-09T08:00:00',
-          '2016-01-11T08:00:00', '2016-01-25T08:00:00', '2016-02-08T08:00:00'
-        ]
-      });
-      */
-
-      //weekly WKST changes output'
-      //MO
-      testRRULE('FREQ=WEEKLY;INTERVAL=2;COUNT=4;BYDAY=TU,SU;WKST=MO', {
-        byCount: true,
-        dates: [
-          '1997-08-05T09:00:00',
-          '1997-08-10T09:00:00',
-          '1997-08-19T09:00:00',
-          '1997-08-24T09:00:00'
-        ]
-      });
-
-      //'weekly WKST changes output'
-      //SU
-      testRRULE('FREQ=WEEKLY;INTERVAL=2;COUNT=4;BYDAY=TU,SU;WKST=SU', {
-        byCount: true,
-        dates: [
-          '1997-08-05T09:00:00',
-          '1997-08-17T09:00:00',
-          '1997-08-19T09:00:00',
-          '1997-08-31T09:00:00'
-        ]
-      });
-
-      // weekly on tuesday
-      testRRULE('FREQ=WEEKLY;BYDAY=TU', {
-        dates: [
-          '2012-09-11T09:00:00',
-          '2012-09-18T09:00:00',
-          '2012-09-25T09:00:00',
-          '2012-10-02T09:00:00',
-          '2012-10-09T09:00:00'
-        ]
-      });
-
-      //buisness days for 31 occurances'
-      testRRULE('FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR', {
-        dates: [
-          '2012-01-02T09:00:00', '2012-01-03T09:00:00', '2012-01-04T09:00:00', '2012-01-05T09:00:00', '2012-01-06T09:00:00',
-          '2012-01-09T09:00:00', '2012-01-10T09:00:00', '2012-01-11T09:00:00', '2012-01-12T09:00:00', '2012-01-13T09:00:00',
-          '2012-01-16T09:00:00', '2012-01-17T09:00:00', '2012-01-18T09:00:00', '2012-01-19T09:00:00', '2012-01-20T09:00:00',
-          '2012-01-23T09:00:00', '2012-01-24T09:00:00', '2012-01-25T09:00:00', '2012-01-26T09:00:00', '2012-01-27T09:00:00',
-          '2012-01-30T09:00:00', '2012-01-31T09:00:00', '2012-02-01T09:00:00', '2012-02-02T09:00:00', '2012-02-03T09:00:00',
-          '2012-02-06T09:00:00', '2012-02-07T09:00:00', '2012-02-08T09:00:00', '2012-02-09T09:00:00', '2012-02-10T09:00:00',
-          '2012-02-13T09:00:00'
-        ]
+      suite('BYMONTH + BYDAY', function() {
+        testRRULE('FREQ=WEEKLY;BYMONTH=8,10;BYDAY=MO,SA', {
+          dates: [
+            '2015-08-15T09:00:00',
+            '2015-08-17T09:00:00',
+            '2015-08-22T09:00:00',
+            '2015-08-24T09:00:00',
+            '2015-08-29T09:00:00',
+            '2015-08-31T09:00:00',
+            '2015-10-03T09:00:00',
+            '2015-10-05T09:00:00',
+            '2015-10-10T09:00:00',
+          ]
+        });
+        testRRULE('FREQ=WEEKLY;BYMONTH=1,12;BYDAY=SA', {
+          dates: [
+            '2015-12-26T09:00:00',
+            '2016-01-02T09:00:00',
+          ]
+        });
       });
     });
 
@@ -1038,10 +1119,10 @@ suite('recur_iterator', function() {
     suite('YEARLY', function() {
       suite('no extra parts', function() {
         testRRULE('FREQ=YEARLY;', {
-          dtStart: '2012-02-29T12:00:00',
           dates: [
-            '2012-02-29T12:00:00',
-            '2016-02-29T12:00:00'
+            '2012-02-01T12:00:00',
+            '2013-02-01T12:00:00',
+            '2014-02-01T12:00:00'
           ]
         });
       });
@@ -1073,7 +1154,6 @@ suite('recur_iterator', function() {
             '2016-08-20T12:00:00'
           ]
         });
-
         //Every year the last day of April (rule without BYMONTH)
         testRRULE('FREQ=YEARLY;BYMONTHDAY=-1', {
           dates: [
@@ -1084,6 +1164,162 @@ suite('recur_iterator', function() {
             '2018-04-30T08:00:00',
             '2019-04-30T08:00:00'
           ]
+        });
+      });
+      suite('BYDAY', function() {
+        suite('without prefix', function() {
+          testRRULE('FREQ=YEARLY;BYDAY=MO', {
+            dates: [
+              '2015-06-15T08:00:00',
+              '2015-06-22T08:00:00',
+              '2015-06-29T08:00:00',
+              '2015-07-06T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=MO,SU', {
+            dates: [
+              '2015-06-15T08:00:00',
+              '2015-06-21T08:00:00',
+              '2015-06-22T08:00:00',
+              '2015-06-28T08:00:00',
+              '2015-06-29T08:00:00',
+              '2015-07-05T08:00:00',
+            ]
+          });
+        });
+        suite('positive prefix', function() {
+          testRRULE('FREQ=YEARLY;BYDAY=1MO', {
+            dates: [
+              '2015-01-05T08:00:00',
+              '2016-01-04T08:00:00',
+              '2017-01-02T08:00:00',
+              '2018-01-01T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=1SU', {
+            dates: [
+              '2015-01-04T08:00:00',
+              '2016-01-03T08:00:00',
+              '2017-01-01T08:00:00',
+              '2018-01-07T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=2MO', {
+            dates: [
+              '2015-01-12T08:00:00',
+              '2016-01-11T08:00:00',
+              '2017-01-09T08:00:00',
+              '2018-01-08T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=7MO', {
+            dates: [
+              '2015-02-16T08:00:00',
+              '2016-02-15T08:00:00',
+              '2017-02-13T08:00:00',
+              '2018-02-12T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=52MO', {
+            dates: [
+              '2015-12-28T08:00:00',
+              '2016-12-26T08:00:00',
+              '2017-12-25T08:00:00',
+              '2018-12-24T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=52SU', {
+            dates: [
+              '2014-12-28T08:00:00',
+              '2015-12-27T08:00:00',
+              '2016-12-25T08:00:00',
+              '2017-12-24T08:00:00',
+              '2018-12-30T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=53MO', {
+            dates: [
+              '2018-12-31T08:00:00',
+              '2024-12-30T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=2MO,3SU', {
+            dates: [
+              '2015-01-12T08:00:00',
+              '2015-01-18T08:00:00',
+              '2016-01-11T08:00:00',
+              '2016-01-17T08:00:00',
+              '2017-01-09T08:00:00',
+            ]
+          });
+        });
+        suite('negative prefix', function() {
+          testRRULE('FREQ=YEARLY;BYDAY=-1MO', {
+            dates: [
+              '2014-12-29T08:00:00',
+              '2015-12-28T08:00:00',
+              '2016-12-26T08:00:00',
+              '2017-12-25T08:00:00',
+              '2018-12-31T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=-1SU', {
+            dates: [
+              '2015-12-27T08:00:00',
+              '2016-12-25T08:00:00',
+              '2017-12-31T08:00:00',
+              '2018-12-30T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=-2MO', {
+            dates: [
+              '2015-12-21T08:00:00',
+              '2016-12-19T08:00:00',
+              '2017-12-18T08:00:00',
+              '2018-12-24T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=-7MO', {
+            dates: [
+              '2015-11-16T08:00:00',
+              '2016-11-14T08:00:00',
+              '2017-11-13T08:00:00',
+              '2018-11-19T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=-52MO', {
+            dates: [
+              '2015-01-05T08:00:00',
+              '2016-01-04T08:00:00',
+              '2017-01-02T08:00:00',
+              '2018-01-08T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=-52SU', {
+            dates: [
+              '2014-01-05T08:00:00',
+              '2015-01-04T08:00:00',
+              '2016-01-03T08:00:00',
+              '2017-01-08T08:00:00',
+              '2018-01-07T08:00:00',
+            ]
+          });
+          testRRULE('FREQ=YEARLY;BYDAY=-53MO', {
+            dates: [
+              '2018-01-01T08:00:00',
+              '2024-01-01T08:00:00',
+            ]
+          });
+
+          testRRULE('FREQ=YEARLY;BYDAY=-3SU,-2MO', {
+            dates: [
+              '2015-12-13T08:00:00',
+              '2015-12-21T08:00:00',
+              '2016-12-11T08:00:00',
+              '2016-12-19T08:00:00',
+              '2017-12-17T08:00:00',
+            ]
+          });
         });
       });
       suite('BYMONTH+BYMONTHDAY', function() {
@@ -1149,8 +1385,6 @@ suite('recur_iterator', function() {
           ]
         });
 
-
-
         //Yearly, every WE and FR of January and March (more BYMONTH and more BYDAY)
         testRRULE('FREQ=YEARLY;BYMONTH=1,3;BYDAY=WE,FR', {
           dates: [
@@ -1165,6 +1399,15 @@ suite('recur_iterator', function() {
             '2014-03-26T08:00:00', '2014-03-28T08:00:00'
           ]
         });
+        testRRULE('FREQ=YEARLY;BYMONTH=8,10;BYDAY=SA', {
+          dates: [
+            '2015-08-15T08:00:00',
+            '2015-08-22T08:00:00',
+            '2015-08-29T08:00:00',
+            '2015-10-03T08:00:00',
+          ]
+        });
+
 
         // Yearly, every day of January (one BYMONTH and more BYDAY
         testRRULE('FREQ=YEARLY;BYMONTH=1;BYDAY=SU,MO,TU,WE,TH,FR,SA', {
@@ -1204,7 +1447,18 @@ suite('recur_iterator', function() {
           ]
         });
       });
-
+      suite('BYMONTH, BYMONTHDAY and BYDAY', function() {
+        testRRULE('FREQ=YEARLY;BYMONTH=9,10;BYMONTHDAY=15,16,17,18,19;BYDAY=MO,WE,SU', {
+        dtStart: '2015-09-16T08:00:00',
+        dates: [
+          '2015-09-16T08:00:00',
+          '2015-10-18T08:00:00',
+          '2015-10-19T08:00:00',
+          '2016-09-18T08:00:00',
+          '2016-09-19T08:00:00',
+        ]
+        });
+      });
       suite('BYWEEKNO', function() {
         // Basic byweekno
         testRRULE('FREQ=YEARLY;BYWEEKNO=2', {
@@ -1213,6 +1467,20 @@ suite('recur_iterator', function() {
             '2016-01-12T08:00:00',
             '2017-01-10T08:00:00',
             '2018-01-09T08:00:00'
+          ]
+        });
+        testRRULE('FREQ=YEARLY;BYWEEKNO=1', {
+          dates: [
+            //'2015-08-15T08:00:00', todo
+            '2016-01-09T08:00:00',
+            '2017-01-07T08:00:00',
+          ]
+        });
+        testRRULE('FREQ=YEARLY;BYWEEKNO=5,10', {
+          dates: [
+            //'2015-08-15T08:00:00', todo
+            '2016-02-06T08:00:00',
+            '2016-03-12T08:00:00',
           ]
         });
         // Basic negative byweekno,
@@ -1224,6 +1492,7 @@ suite('recur_iterator', function() {
             '2018-01-02T08:00:00'
           ]
         });
+
         //yearly, byMonth, byweekNo
         testRRULE('FREQ=YEARLY;BYMONTH=6,9;BYWEEKNO=23', {
           dates: [
@@ -1243,26 +1512,24 @@ suite('recur_iterator', function() {
             '2018-06-18T08:00:00'
           ]
         });
-/*
-        testRRULE.only('FREQ=YEARLY;BYMONTHDAY=-27,-26,-25,-24,-23;BYWEEKNO=23', {
+
+        testRRULE('FREQ=YEARLY;BYMONTHDAY=-27,-26,-25,-24,-23;BYWEEKNO=23', {
           dates: [
-            '2015-06-08T08:00:00',
+            '2015-06-05T08:00:00',
+            '2015-06-06T08:00:00',
+            '2015-06-07T08:00:00',
             '2016-06-06T08:00:00',
             '2016-06-07T08:00:00',
             '2016-06-08T08:00:00',
             '2017-06-05T08:00:00',
             '2017-06-06T08:00:00',
-            '2017-06-07T08:00:00',
-            '2017-06-08T08:00:00',
-            '2018-06-04T08:00:00',
-            '2018-06-05T08:00:00',
           ]
         });
 
         //yearly, byweekNo, bymonthday
         testRRULE('FREQ=YEARLY;BYMONTHDAY=4,5,6,7,8;BYWEEKNO=23', {
           dates: [
-            '2015-06-08T08:00:00',
+            //'2015-06-08T08:00:00',todo
             '2016-06-06T08:00:00',
             '2016-06-07T08:00:00',
             '2016-06-08T08:00:00',
@@ -1279,26 +1546,27 @@ suite('recur_iterator', function() {
         });
 
         //yearly, negative byweekNo, bymonthday
-        testRRULE('FREQ=YEARLY;BYMONTHDAY=4,5,6,7,8;BYWEEKNO=-28', {
+        testRRULE('FREQ=YEARLY;BYMONTHDAY=4,5,6,7,8;BYWEEKNO=-31', {
           dates: [
-            '2016-06-06T08:00:00',
-            '2016-06-07T08:00:00',
-            '2016-06-08T08:00:00',
-            '2017-06-05T08:00:00',
-            '2017-06-06T08:00:00',
-            '2017-06-07T08:00:00',
-            '2017-06-08T08:00:00',
-            '2018-06-04T08:00:00',
-            '2018-06-05T08:00:00',
-            '2018-06-06T08:00:00',
-            '2018-06-07T08:00:00',
-            '2018-06-08T08:00:00'
+            '2016-06-04T08:00:00',
+            '2016-06-05T08:00:00',
+            '2017-06-04T08:00:00',
+            '2020-06-04T08:00:00',
           ]
         });
-      */
+
+        //yearly, byweekno, byday
+        testRRULE('FREQ=YEARLY;BYWEEKNO=3;BYDAY=MO,TU', {
+          dates: [
+            '2016-01-18T08:00:00',
+            '2016-01-19T08:00:00',
+            '2017-01-16T08:00:00',
+            '2017-01-17T08:00:00',
+          ]
+        });
     });
 
-    suite.skip('BYYEARDAY', function() {
+    suite('BYYEARDAY', function() {
       // Tycho brahe days - yearly, byYearDay with negative offsets
       testRRULE('FREQ=YEARLY;BYYEARDAY=1,2,4,6,11,12,20,42,48,49,-306,-303,' +
                 '-293,-292,-266,-259,-258,-239,-228,-209,-168,-164,-134,-133,' +
@@ -1970,9 +2238,13 @@ suite('recur_iterator', function() {
         testFastForward('FREQ=WEEKLY;INTERVAL=5',
                         '2015-09-03T12:00:00', '2015-09-19T12:00:00');
       });
-      suite.skip('BYMONTH', function() {
+      suite('BYMONTH', function() {
         testFastForward('FREQ=WEEKLY;BYMONTH=9',
-                        '2015-08-15T12:00:00', '2015-09-05T12:00:00');
+                        '2015-09-01T12:00:00', '2015-09-05T12:00:00');
+        testFastForward('FREQ=WEEKLY;BYMONTH=9,10',
+                        '2015-10-04T12:00:00', '2015-10-10T12:00:00');
+        testFastForward('FREQ=WEEKLY;BYMONTH=12',
+                        '2015-09-04T12:00:00', '2015-12-05T12:00:00');
       });
       suite('BYDAY', function() {
         testFastForward('FREQ=WEEKLY;BYDAY=SA',
@@ -1983,13 +2255,165 @@ suite('recur_iterator', function() {
                         '2015-08-17T12:00:00', '2015-08-23T12:00:00');
         testFastForward('FREQ=WEEKLY;BYDAY=TH',
                         '2015-09-04T12:00:00', '2015-09-10T12:00:00');
+        testFastForward('FREQ=WEEKLY;BYDAY=FR,SU',
+                        '2015-09-05T12:00:00', '2015-09-06T12:00:00');
       });
-      //todo BYSETPOS
+      suite('BYMONTH + BYDAY', function() {
+        testFastForward('FREQ=WEEKLY;BYDAY=SA;BYMONTH=8',
+                        '2015-08-16T12:00:00', '2015-08-22T12:00:00');
+        testFastForward('FREQ=WEEKLY;BYDAY=SA;BYMONTH=8,10',
+                        '2015-10-16T12:00:00', '2015-10-17T12:00:00');
+        testFastForward('FREQ=WEEKLY;BYDAY=SA;BYMONTH=8,10,12',
+                        '2015-12-16T12:00:00', '2015-12-19T12:00:00');
+      });
     });
-    suite("YEARLY", function() {//todo
+
+    suite("YEARLY", function() {
       suite('no extra parts', function() {
         testFastForward('FREQ=YEARLY',
                         '2016-01-02T12:00:00', '2016-08-15T12:00:00');
+        testFastForward('FREQ=YEARLY',
+                        '2017-01-02T12:00:00', '2017-08-15T12:00:00');
+      });
+      suite('BYMONTH', function() {
+        testFastForward('FREQ=YEARLY;BYMONTH=3',
+                        '2016-01-02T12:00:00', '2016-03-15T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=12',
+                        '2016-01-02T12:00:00', '2016-12-15T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=1,12',
+                        '2016-02-02T12:00:00', '2016-12-15T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=1,12',
+                        '2016-01-01T12:00:00', '2016-01-15T12:00:00');
+      });
+      suite('BYWEEKNO', function() {
+        testFastForward('FREQ=YEARLY;BYWEEKNO=33',
+                        '2016-01-01T12:00:00', '2016-08-20T12:00:00');
+        testFastForward('FREQ=YEARLY;BYWEEKNO=1',
+                        '2016-01-01T12:00:00', '2016-01-09T12:00:00');
+        testFastForward('FREQ=YEARLY;BYWEEKNO=52',
+                        '2016-01-01T12:00:00', '2016-12-31T12:00:00');
+        testFastForward('FREQ=YEARLY;BYWEEKNO=52',
+                        '2017-01-01T12:00:00', '2017-12-30T12:00:00');
+      });
+      suite('BYYEARDAY', function() {
+        testFastForward('FREQ=YEARLY;BYYEARDAY=227',
+                        '2016-01-01T12:00:00', '2016-08-14T12:00:00');
+        testFastForward('FREQ=YEARLY;BYYEARDAY=1',
+                        '2016-01-01T12:00:00', '2016-01-01T12:00:00');
+        testFastForward('FREQ=YEARLY;BYYEARDAY=-1',
+                        '2016-01-01T12:00:00', '2016-12-31T12:00:00');
+        testFastForward('FREQ=YEARLY;BYYEARDAY=-1,1',
+                        '2016-01-02T12:00:00', '2016-12-31T12:00:00');
+      });
+      suite('BYMONTHDAY', function() {
+        testFastForward('FREQ=YEARLY;BYMONTHDAY=15',
+                        '2016-01-01T12:00:00', '2016-08-15T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTHDAY=15,16',
+                        '2016-08-16T12:00:00', '2016-08-16T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTHDAY=15,16,30',
+                        '2016-08-20T12:00:00', '2016-08-30T12:00:00');
+      });
+      suite('BYDAY', function() {
+        testFastForward('FREQ=YEARLY;BYDAY=SA',
+                        '2015-09-01T12:00:00', '2015-09-05T12:00:00');
+        testFastForward('FREQ=YEARLY;BYDAY=SA,SU',
+                        '2015-09-06T12:00:00', '2015-09-06T12:00:00');
+        testFastForward('FREQ=YEARLY;BYDAY=1SA',
+                        '2015-09-06T12:00:00', '2016-01-02T12:00:00');
+        testFastForward('FREQ=YEARLY;BYDAY=-1SA',
+                        '2015-09-06T12:00:00', '2015-12-26T12:00:00');
+      });
+      suite('BYMONTH + BYWEEKNO', function() {
+        testFastForward('FREQ=YEARLY;BYMONTH=1;BYWEEKNO=1',
+                        '2015-09-01T12:00:00', '2016-01-09T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=1;BYWEEKNO=2',
+                        '2015-09-01T12:00:00', '2016-01-16T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=8,9;BYWEEKNO=31,32,33',
+                        '2015-09-01T12:00:00', '2016-08-06T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=8,9;BYWEEKNO=31,32,33',
+                        '2016-08-10T12:00:00', '2016-08-13T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=8,10;BYWEEKNO=33',
+                        '2015-08-16T12:00:00', '2016-08-20T12:00:00');
+      });
+      suite('BYMONTH + BYYEARDAY', function() {
+        testFastForward('FREQ=YEARLY;BYMONTH=1;BYYEARDAY=1',
+                        '2015-09-01T12:00:00', '2016-01-01T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=1,12;BYYEARDAY=1,365',
+                        '2015-09-01T12:00:00', '2015-12-31T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=1,12;BYYEARDAY=1,365',
+                        '2016-01-01T12:00:00', '2016-01-01T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=7;BYYEARDAY=190,191,192,365',
+                        '2016-09-01T12:00:00', '2017-07-09T12:00:00');
+      });
+      suite('BYMONTH + BYMONTHDAY', function() {
+        testFastForward('FREQ=YEARLY;BYMONTH=1,12;BYMONTHDAY=1,31',
+                        '2016-01-01T12:00:00', '2016-01-01T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=8,10;BYMONTHDAY=15,20',
+                        '2015-09-01T12:00:00', '2015-10-15T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=8,10;BYMONTHDAY=15,20',
+                        '2015-10-16T12:00:00', '2015-10-20T12:00:00');
+      });
+      suite('BYMONTH + BYDAY', function() {
+        testFastForward('FREQ=YEARLY;BYMONTH=8,10;BYDAY=SA',
+                        '2015-08-16T12:00:00', '2015-08-22T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=8,10;BYDAY=SA',
+                        '2015-09-16T12:00:00', '2015-10-03T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=8,10;BYDAY=1SA',
+                        '2015-09-16T12:00:00', '2015-10-03T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTH=8,10;BYDAY=3SA',
+                        '2015-09-16T12:00:00', '2015-10-17T12:00:00');
+      });
+      suite('BYDAY + BYWEEKNO', function() {
+        testFastForward('FREQ=YEARLY;BYDAY=SA;BYWEEKNO=33',
+                        '2015-08-16T12:00:00', '2016-08-20T12:00:00');
+        testFastForward('FREQ=YEARLY;BYDAY=SA,SU;BYWEEKNO=33',
+                        '2015-08-16T12:00:00', '2015-08-16T12:00:00');
+        testFastForward('FREQ=YEARLY;BYDAY=SA,SU;BYWEEKNO=33',
+                        '2015-08-17T12:00:00', '2016-08-20T12:00:00');
+      });
+      suite('BYDAY + YEARDAY', function() {
+        testFastForward('FREQ=YEARLY;BYDAY=SA;BYYEARDAY=227',
+                        '2015-08-16T12:00:00', '2026-08-15T12:00:00');
+        testFastForward('FREQ=YEARLY;BYDAY=SA,SU;BYYEARDAY=227',
+                        '2015-08-16T12:00:00', '2016-08-14T12:00:00');
+        testFastForward('FREQ=YEARLY;BYDAY=SA,SU;BYYEARDAY=227',
+                        '2017-08-16T12:00:00', '2021-08-15T12:00:00');
+      });
+      suite('BYWEEKNO + BYYEARDAY', function() {
+        testFastForward('FREQ=YEARLY;BYWEEKNO=52,53;BYYEARDAY=360',
+                        '2015-08-16T12:00:00', '2015-12-26T12:00:00');
+        testFastForward('FREQ=YEARLY;BYWEEKNO=1,2;BYYEARDAY=5,11',
+                        '2015-08-16T12:00:00', '2016-01-05T12:00:00');
+      });
+      suite('BYWEEKNO + BYMONTHDAY', function() {
+        testFastForward('FREQ=YEARLY;BYWEEKNO=1,2;BYMONTHDAY=8,10',
+                        '2015-08-16T12:00:00', '2016-01-08T12:00:00');
+        testFastForward('FREQ=YEARLY;BYWEEKNO=1,2;BYMONTHDAY=8,10',
+                        '2016-01-09T12:00:00', '2016-01-10T12:00:00');
+      });
+      suite('BYWEEKNO + BYDAY', function() {
+        testFastForward('FREQ=YEARLY;BYWEEKNO=1,2;BYDAY=MO,WE',
+                        '2015-08-16T12:00:00', '2016-01-04T12:00:00');
+        testFastForward('FREQ=YEARLY;BYWEEKNO=1,2;BYDAY=MO,WE',
+                        '2016-01-05T12:00:00', '2016-01-06T12:00:00');
+      });
+      suite('BYYEARDAY + BYMONTHDAY', function() {
+        testFastForward('FREQ=YEARLY;BYYEARDAY=361,362,363,364,365;BYMONTHDAY=30,31',
+                        '2015-08-16T12:00:00', '2015-12-30T12:00:00');
+        testFastForward('FREQ=YEARLY;BYYEARDAY=361,362,363,364,365;BYMONTHDAY=30,31',
+                        '2017-01-01T12:00:00', '2017-12-30T12:00:00');
+      });
+      suite('BYYEARDAY + BYDAY', function() {
+        testFastForward('FREQ=YEARLY;BYYEARDAY=361,362,363,364,365;BYDAY=MO,WE',
+                        '2015-08-16T12:00:00', '2015-12-28T12:00:00');
+        testFastForward('FREQ=YEARLY;BYYEARDAY=361,362,363,364,365;BYDAY=MO,WE',
+                        '2015-12-29T12:00:00', '2015-12-30T12:00:00');
+      });
+      suite('BYMONTHDAY + BYDAY', function() {
+        testFastForward('FREQ=YEARLY;BYMONTHDAY=15,17;BYDAY=MO,SA',
+                        '2015-08-16T12:00:00', '2015-08-17T12:00:00');
+        testFastForward('FREQ=YEARLY;BYMONTHDAY=15,17;BYDAY=MO,SA',
+                        '2015-08-18T12:00:00', '2015-10-17T12:00:00');
       });
     });
   });
