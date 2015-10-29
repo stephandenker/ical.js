@@ -1646,6 +1646,64 @@ suite('icaltime', function() {
       );
     });
 
+    test('weeksInYear', function() {
+      assert.equal(Time.weeksInYear(2015, ICAL.Time.SUNDAY),52);
+      assert.equal(Time.weeksInYear(2015, ICAL.Time.MONDAY),53);
+      assert.equal(Time.weeksInYear(2015, ICAL.Time.TUESDAY),52);
+      assert.equal(Time.weeksInYear(2015, ICAL.Time.WEDNESDAY),52);
+      assert.equal(Time.weeksInYear(2015, ICAL.Time.THURSDAY),52);
+      assert.equal(Time.weeksInYear(2015, ICAL.Time.FRIDAY),52);
+      assert.equal(Time.weeksInYear(2015, ICAL.Time.SATURDAY),52);
+
+      assert.equal(Time.weeksInYear(2014, ICAL.Time.SUNDAY),53);
+      assert.equal(Time.weeksInYear(2014, ICAL.Time.MONDAY),52);
+      assert.equal(Time.weeksInYear(2014, ICAL.Time.TUESDAY),52);
+      assert.equal(Time.weeksInYear(2014, ICAL.Time.WEDNESDAY),52);
+      assert.equal(Time.weeksInYear(2014, ICAL.Time.THURSDAY),52);
+      assert.equal(Time.weeksInYear(2014, ICAL.Time.FRIDAY),52);
+      assert.equal(Time.weeksInYear(2014, ICAL.Time.SATURDAY),52);
+
+      assert.equal(Time.weeksInYear(2013, ICAL.Time.SUNDAY),52);
+      assert.equal(Time.weeksInYear(2013, ICAL.Time.MONDAY),52);
+      assert.equal(Time.weeksInYear(2013, ICAL.Time.TUESDAY),52);
+      assert.equal(Time.weeksInYear(2013, ICAL.Time.WEDNESDAY),52);
+      assert.equal(Time.weeksInYear(2013, ICAL.Time.THURSDAY),52);
+      assert.equal(Time.weeksInYear(2013, ICAL.Time.FRIDAY),52);
+      assert.equal(Time.weeksInYear(2013, ICAL.Time.SATURDAY),53);
+
+      assert.equal(Time.weeksInYear(2012, ICAL.Time.SUNDAY),52);
+      assert.equal(Time.weeksInYear(2012, ICAL.Time.MONDAY),52);
+      assert.equal(Time.weeksInYear(2012, ICAL.Time.TUESDAY),52);
+      assert.equal(Time.weeksInYear(2012, ICAL.Time.WEDNESDAY),52);
+      assert.equal(Time.weeksInYear(2012, ICAL.Time.THURSDAY),53);
+      assert.equal(Time.weeksInYear(2012, ICAL.Time.FRIDAY),53);
+      assert.equal(Time.weeksInYear(2012, ICAL.Time.SATURDAY),52);
+
+      assert.equal(Time.weeksInYear(2011, ICAL.Time.SUNDAY),52);
+      assert.equal(Time.weeksInYear(2011, ICAL.Time.MONDAY),52);
+      assert.equal(Time.weeksInYear(2011, ICAL.Time.TUESDAY),52);
+      assert.equal(Time.weeksInYear(2011, ICAL.Time.WEDNESDAY),53);
+      assert.equal(Time.weeksInYear(2011, ICAL.Time.THURSDAY),52);
+      assert.equal(Time.weeksInYear(2011, ICAL.Time.FRIDAY),52);
+      assert.equal(Time.weeksInYear(2011, ICAL.Time.SATURDAY),52);
+
+      assert.equal(Time.weeksInYear(2010, ICAL.Time.SUNDAY),52);
+      assert.equal(Time.weeksInYear(2010, ICAL.Time.MONDAY),52);
+      assert.equal(Time.weeksInYear(2010, ICAL.Time.TUESDAY),53);
+      assert.equal(Time.weeksInYear(2010, ICAL.Time.WEDNESDAY),52);
+      assert.equal(Time.weeksInYear(2010, ICAL.Time.THURSDAY),52);
+      assert.equal(Time.weeksInYear(2010, ICAL.Time.FRIDAY),52);
+      assert.equal(Time.weeksInYear(2010, ICAL.Time.SATURDAY),52);
+
+      assert.equal(Time.weeksInYear(2009, ICAL.Time.SUNDAY),52);
+      assert.equal(Time.weeksInYear(2009, ICAL.Time.MONDAY),53);
+      assert.equal(Time.weeksInYear(2009, ICAL.Time.TUESDAY),52);
+      assert.equal(Time.weeksInYear(2009, ICAL.Time.WEDNESDAY),52);
+      assert.equal(Time.weeksInYear(2009, ICAL.Time.THURSDAY),52);
+      assert.equal(Time.weeksInYear(2009, ICAL.Time.FRIDAY),52);
+      assert.equal(Time.weeksInYear(2009, ICAL.Time.SATURDAY),52);
+    });
+
     suite("weekNumber", function() {
       test('cache', function() {
         ICAL.Time._wnCache = {};
